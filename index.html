@@ -31,6 +31,9 @@
       .pb-1 {
         padding-bottom: 1rem;
       }
+      .mt-1 {
+        margin-top: 1em;
+      }
 
       .centered {
         margin-left: auto;
@@ -78,22 +81,7 @@
   </head>
   <body>
     <div class="content centered rounded-xl">
-      <div id="main"></div>
-      <div>
-        <input
-          type="text"
-          class="rounded-sm place-stretch px-0_5 bg-gray items-center border-none"
-          id="answer"
-          onkeyup="updateDisabled()"
-        />
-      </div>
-      <div class="py-1 self-center">
-        <button type="button" onclick="checkAnswer()" id="checkAnswerButton">
-          Check word
-        </button>
-        <button type="button" onclick="nextWord()">Next word</button>
-      </div>
-      <div id="footer"></div>
+      <div id="app"></div>
     </div>
   </body>
   <script src="flashcards.js"></script>
