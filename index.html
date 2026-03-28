@@ -18,6 +18,16 @@
         padding-bottom: 1em;
       }
 
+      .px-1 {
+        padding-left: 1em;
+        padding-right: 1em;
+      }
+
+      .px-0_5 {
+        padding-left: 0.5em;
+        padding-right: 0.5em;
+      }
+
       .pb-1 {
         padding-bottom: 1rem;
       }
@@ -29,26 +39,55 @@
 
       .content {
         padding: 4em;
-        width: 27em;
+        width: 30em;
         background-color: #111;
+        margin-top: 1em;
       }
 
       .self-center {
         justify-self: center;
       }
+      .items-center {
+        justify-items: center;
+      }
 
       .text-lg {
         font-size: 4rem;
       }
+
+      .text-gray {
+        color: #aaa;
+      }
+      .bg-gray {
+        background-color: #aaa;
+      }
+      .rounded-xl {
+        border-radius: 1em;
+      }
+      .rounded-sm {
+        border-radius: 1rem;
+      }
+      .border-none {
+        border: none;
+      }
+      .place-stretch {
+        display: flex;
+        place-self: stretch;
+      }
     </style>
   </head>
   <body>
-    <div class="content centered">
+    <div class="content centered rounded-xl">
       <div id="main"></div>
       <div>
-        <input type="text" id="answer" onkeyup="updateDisabled()" />
+        <input
+          type="text"
+          class="rounded-sm place-stretch px-0_5 bg-gray items-center border-none"
+          id="answer"
+          onkeyup="updateDisabled()"
+        />
       </div>
-      <div class="py-1">
+      <div class="py-1 self-center">
         <button type="button" onclick="checkAnswer()" id="checkAnswerButton">
           Check word
         </button>
