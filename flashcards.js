@@ -8,6 +8,7 @@ let wordlist = [
 ];
 
 const main = document.getElementById("main");
+const footer = document.getElementById("footer");
 const checkAnswerButton = document.getElementById("checkAnswerButton");
 const answerElement = document.getElementById("answer");
 answerElement.focus();
@@ -26,6 +27,7 @@ const nextWord = () => {
   answerElement.value = "";
   getRandomWord();
   updateUI();
+  answerElement.focus();
 };
 
 const checkAnswer = () => {
@@ -48,13 +50,13 @@ const updateDisabled = () => {
 
 function updateUI() {
   const component = `
-    <div>Remaining words: ${wordlist.length}
-    <div>Current word: <span style="color: #aaa; font-size: 40px;">${currentWord.eng || ""}</span></div>
+    <div class="self-center text-lg pb-1" style="color: #aaa;">${currentWord.eng || ""}</div>
     <div>${outcome}</div>
-    <div>How do you write that in Bulgarian?</div>
+    <div class="py-1">How do you write that in Bulgarian?</div>
   `;
 
   if (main) main.innerHTML = component;
-  else console.log("#main is not loaded");
+  if (footer)
+    footer.innerHTML = `<div>Remaining words: ${wordlist.length}<div>`;
 }
 updateUI();
