@@ -7,6 +7,9 @@ let wordlist = [
   { bul: "доволен", eng: "satisfied" },
 ];
 
+const total = wordlist.length;
+let score = 0;
+
 let answerElement;
 let outcome = "";
 
@@ -27,17 +30,20 @@ const nextWord = () => {
   outcome = "";
   getRandomWord();
   updateUI();
-  answerElement.focus();
+  if (currentWord) answerElement.focus();
 };
 
 let checkAnswerButton;
 const checkAnswer = () => {
   const answer = answerElement.value;
   if (!answer) outcome = "";
-  else if (answer.toLowerCase() === currentWord.bul.toLowerCase())
+  else if (answer.toLowerCase() === currentWord.bul.toLowerCase()) {
     outcome = "correct!";
-  else outcome = `"${answer}" is incorrect. Please try again.`;
+    score = score + 1;
+    setTimeout(() => nextWord(), 700);
+  } else outcome = `"${answer}" is incorrect. Please try again.`;
   updateUI();
+  answerElement.value = answer;
   answerElement.focus();
 };
 
@@ -59,25 +65,32 @@ function updateUI() {
     `;
   } else {
     content = `
-    <div class="self-center text-lg text-gray pb-1 primary">${currentWord.eng || ""}</div>
-    <div class="py-1 self-center">How do you write that in Bulgarian?</div>
-    <div>
-      <input
-        type="text"
-        class="rounded-sm place-stretch px-0_5 bg-gray items-center border-none"
-        id="answer"
-        onkeyup="updateDisabled()"
-      />
-      <div class="self-center mt-1">${outcome}</div>
-    </div>
-    <div class="py-1 self-center">
-      <button type="button" onclick="checkAnswer()" id="checkAnswerButton">
-        Check word
-      </button>
-      <button type="button" onclick="nextWord()">Next word</button>
-    </div>
-    <div class="self-center">Remaining words: ${wordlist.length}<div>
-  `;
+      <div class="self-center text-lg text-gray pb-1 primary">
+        ${currentWord.eng || ""}
+      </div>
+      <div class="py-1 self-center">How do you write that in Bulgarian?</div>
+      <div>
+        <input
+          type="text"
+          class="rounded-sm place-stretch px-0_5 bg-gray items-center border-none"
+          id="answer"
+          onkeyup="updateDisabled()"
+        />
+        <div class="self-center mt-1">${outcome}</div>
+      </div>
+      <div class="py-1 self-center">
+        <button type="button" onclick="checkAnswer()" id="checkAnswerButton">
+          Check word
+        </button>
+        <button type="button" onclick="nextWord()">Next word</button>
+      </div>
+      <div class="self-center">
+        Remaining words: ${wordlist.length}
+      </div>
+      <div class="self-center py-1">
+        Score: ${score}/${total}
+      </div>
+    `;
   }
 
   document.getElementById("app").innerHTML = content;
