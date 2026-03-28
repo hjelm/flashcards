@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Flash Cards</title>
+    <style>
+      body {
+        background: #000;
+        color: #eee;
+      }
+
+      input {
+        font-size: 40px;
+      }
+
+      .py-1 {
+        padding-top: 1em;
+        padding-bottom: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main"></div>
+    <div>
+      <input type="text" id="answer" name="answer" onkeyup="updateDisabled()" />
+    </div>
+    <div class="py-1">
+      <button type="button" onclick="checkAnswer()" id="checkAnswerButton">
+        Check word
+      </button>
+      <button type="button" onclick="nextWord()">Next word</button>
+    </div>
+  </body>
+  <script src="flashcards.js"></script>
+</html>
