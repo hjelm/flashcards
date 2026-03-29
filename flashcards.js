@@ -1,78 +1,75 @@
-(() => {
-  const wordList = [
-    { bul: "дразнещ", eng: "irritating" },
-    { bul: "тъкмо", eng: "just now" },
-    { bul: "поздравления", eng: "congratulations" },
-    { bul: "споделяне", eng: "share" },
-    { bul: "скучно", eng: "bored" },
-    { bul: "доволен", eng: "satisfied" },
-  ];
-  const total = wordList.length;
-  let score = 0;
-  const mistakeList = [];
-  let answerInputBgColor = "#aaa";
-  let answerInput;
-  let outcome = "";
+const wordList = [
+  { bul: "дразнещ", eng: "irritating" },
+  { bul: "тъкмо", eng: "just now" },
+  { bul: "поздравления", eng: "congratulations" },
+  { bul: "споделяне", eng: "share" },
+  { bul: "скучно", eng: "bored" },
+  { bul: "доволен", eng: "satisfied" },
+];
+const total = wordList.length;
+let score = 0;
+const mistakeList = [];
+let answerInputBgColor = "#aaa";
+let answerInput;
+let outcome = "";
 
-  const getRandomWord = () => {
-    if (wordList.length === 0) {
-      currentWord = undefined;
-      return;
-    }
-    const index = Math.round(Math.random() * (wordList.length - 1));
-    const word = { ...wordList[index] };
-    wordList.splice(index, 1);
-    return word;
-  };
+const getRandomWord = () => {
+  if (wordList.length === 0) {
+    currentWord = undefined;
+    return;
+  }
+  const index = Math.round(Math.random() * (wordList.length - 1));
+  return wordList.splice(index, 1).pop();
+};
 
-  let currentWord = getRandomWord();
+let currentWord = getRandomWord();
 
-  const nextWord = () => {
-    answerInput.value = "";
-    outcome = "";
-    currentWord = getRandomWord();
+const nextWord = () => {
+  answerInput.value = "";
+  outcome = "";
+  currentWord = getRandomWord();
+  updateUI();
+  if (currentWord) answerInput.focus();
+};
+
+const checkAnswer = () => {
+  const answer = answerInput.value;
+  if (!answer) outcome = "";
+  else if (answer.toLowerCase() === currentWord.bul.toLowerCase()) {
+    outcome = "correct!";
+    answerInputBgColor = "green";
+    score = score + 1;
+  } else {
+    outcome = `"${answer}" is incorrect.`;
+    answerInputBgColor = "red";
+    mistakeList.push({ ...currentWord, answer: answer });
+  }
+  setTimeout(() => {
+    nextWord();
+    answerInputBgColor = "#aaa";
     updateUI();
-    if (currentWord) answerInput.focus();
-  };
+  }, 700);
+  updateUI();
+  answerInput.value = answer;
+  answerInput.focus();
+};
 
-  const checkAnswer = () => {
-    const answer = answerInput.value;
-    if (!answer) outcome = "";
-    else if (answer.toLowerCase() === currentWord.bul.toLowerCase()) {
-      outcome = "correct!";
-      answerInputBgColor = "green";
-      score = score + 1;
-    } else {
-      outcome = `"${answer}" is incorrect.`;
-      answerInputBgColor = "red";
-      mistakeList.push({ ...currentWord, answer: answer });
-    }
-    setTimeout(() => {
-      nextWord();
-      answerInputBgColor = "#aaa";
-      updateUI();
-    }, 700);
-    updateUI();
-    answerInput.value = answer;
-    answerInput.focus();
-  };
-
-  function updateUI() {
-    let content;
-    if (!currentWord) {
-      content = `
+function updateUI() {
+  let content;
+  if (!currentWord) {
+    content = `
       <p>No uncompleted words exists on the list.
       Refresh your browser to start over again.</p>
       `;
-      if (mistakeList.length > 0)
-        content += `
+    if (mistakeList.length > 0)
+      content += `
         <div class="list-title">Errors:</div>
         <ul>
         ${mistakeList.map((e) => `<li>"${e.answer}" correct: "${e.bul}"</li>`).join("\n")}
         <ul>
         `;
-    } else {
-      content = `
+  } else {
+    content = `
       <div class="self-center text-lg text-gray pb-1 primary">
         ${currentWord.eng || ""}
       </div>
@@ -96,20 +93,19 @@
         Score: ${score}/${total}
       </div>
     `;
-    }
-
-    document.getElementById("app").innerHTML = content;
-    const answerForm = document.getElementById("answerForm");
-    if (answerForm) {
-      answerForm.onsubmit = (e) => {
-        e.preventDefault();
-        checkAnswer();
-      };
-    }
-    answerInput = document.getElementById("answerInput");
-    if (currentWord) {
-      answerInput.focus();
-    }
   }
-  updateUI();
-})();
+
+  document.getElementById("app").innerHTML = content;
+  const answerForm = document.getElementById("answerForm");
+  if (answerForm) {
+    answerForm.onsubmit = (e) => {
+      e.preventDefault();
+      checkAnswer();
+    };
+  }
+  answerInput = document.getElementById("answerInput");
+  if (currentWord) {
+    answerInput.focus();
+  }
+}
+updateUI();
