@@ -34,7 +34,6 @@
     if (currentWord) answerElement.focus();
   };
 
-  let checkAnswerButton;
   const checkAnswer = () => {
     const answer = answerElement.value;
     if (!answer) outcome = "";
@@ -92,15 +91,11 @@
     }
 
     document.getElementById("app").innerHTML = content;
-
+    document.getElementById("answerForm").onsubmit = (e) => {
+      e.preventDefault();
+      checkAnswer();
+    };
     answerElement = document.getElementById("answer");
-    const answerForm = document.getElementById("answerForm");
-    if (answerForm) {
-      answerForm.onsubmit = (e) => {
-        e.preventDefault();
-        checkAnswer();
-      };
-    }
     if (initialLoad) {
       answerElement.focus();
     }
