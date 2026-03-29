@@ -58,14 +58,14 @@ function updateUI() {
   let content;
   if (!currentWord) {
     content = `
-      <p>No uncompleted words exists on the list.
+      <p>No uncompleted words exists on the current list.<br/>
       Refresh your browser to start over again.</p>
       `;
     if (mistakeList.length > 0)
       content += `
-        <div class="list-title">Errors:</div>
+        <div class="list-title">Your mistakes:</div>
         <ul>
-        ${mistakeList.map((e) => `<li>"${e.answer}" correct: "${e.bul}"</li>`).join("\n")}
+        ${mistakeList.map((e) => `<li>You wrote "${e.answer}", correct is "${e.bul}"</li>`).join("\n")}
         <ul>
         `;
   } else {
