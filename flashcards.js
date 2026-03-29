@@ -10,47 +10,53 @@
   const total = wordList.length;
   let score = 0;
   const mistakeList = [];
-
-  let answerElement;
+  let answerInputBgColor = "#aaa";
+  let answerInput;
   let outcome = "";
 
-  let currentWord;
   const getRandomWord = () => {
     if (wordList.length === 0) {
       currentWord = undefined;
       return;
     }
     const index = Math.round(Math.random() * (wordList.length - 1));
-    currentWord = { ...wordList[index] };
+    const word = { ...wordList[index] };
     wordList.splice(index, 1);
+    return word;
   };
-  getRandomWord();
+
+  let currentWord = getRandomWord();
 
   const nextWord = () => {
-    answerElement.value = "";
+    answerInput.value = "";
     outcome = "";
-    getRandomWord();
+    currentWord = getRandomWord();
     updateUI();
-    if (currentWord) answerElement.focus();
+    if (currentWord) answerInput.focus();
   };
 
   const checkAnswer = () => {
-    const answer = answerElement.value;
+    const answer = answerInput.value;
     if (!answer) outcome = "";
     else if (answer.toLowerCase() === currentWord.bul.toLowerCase()) {
       outcome = "correct!";
+      answerInputBgColor = "green";
       score = score + 1;
     } else {
       outcome = `"${answer}" is incorrect.`;
+      answerInputBgColor = "red";
       mistakeList.push({ ...currentWord, answer: answer });
     }
-    setTimeout(() => nextWord(), 700);
+    setTimeout(() => {
+      nextWord();
+      answerInputBgColor = "#aaa";
+      updateUI();
+    }, 700);
     updateUI();
-    answerElement.value = answer;
-    answerElement.focus();
+    answerInput.value = answer;
+    answerInput.focus();
   };
 
-  let initialLoad = true;
   function updateUI() {
     let content;
     if (!currentWord) {
@@ -58,7 +64,7 @@
       <p>No uncompleted words exists on the list.
       Refresh your browser to start over again.</p>
       `;
-      if (mistakeList)
+      if (mistakeList.length > 0)
         content += `
         <div class="list-title">Errors:</div>
         <ul>
@@ -75,8 +81,10 @@
       <div>
         <input
           type="text"
-          class="rounded-sm place-stretch px-0_5 bg-gray items-center border-none"
-          id="answer"
+          placeholder="Enter answer"
+          class="rounded-sm place-stretch px-0_5 items-center border-none"
+          style="background-color: ${answerInputBgColor}"
+          id="answerInput"
         />
         <div class="self-center mt-1">${outcome}</div>
       </div>
@@ -91,15 +99,17 @@
     }
 
     document.getElementById("app").innerHTML = content;
-    document.getElementById("answerForm").onsubmit = (e) => {
-      e.preventDefault();
-      checkAnswer();
-    };
-    answerElement = document.getElementById("answer");
-    if (initialLoad) {
-      answerElement.focus();
+    const answerForm = document.getElementById("answerForm");
+    if (answerForm) {
+      answerForm.onsubmit = (e) => {
+        e.preventDefault();
+        checkAnswer();
+      };
     }
-    initialLoad = false;
+    answerInput = document.getElementById("answerInput");
+    if (currentWord) {
+      answerInput.focus();
+    }
   }
   updateUI();
 })();
