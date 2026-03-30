@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <title>Flash Cards</title>
     <style>
+      html {
+        --textColor: #aaa;
+      }
       body {
         background: #000;
         color: #eee;
@@ -16,6 +19,19 @@
         list-style-position: unset;
         padding-left: unset;
         margin-top: 0.5em;
+        font-size: 28px;
+      }
+      a {
+        color: var(--textColor);
+        text-decoration: unset;
+      }
+      .button {
+        background-color: #111;
+        border-radius: 5px;
+        padding: 1em;
+      }
+      .nav-bar {
+        width: 38em;
       }
       .list-title {
         margin-bottom: 0.5em;
@@ -37,6 +53,9 @@
       }
       .mt-1 {
         margin-top: 1em;
+      }
+      .gap-0_5 {
+        gap: 0.5em;
       }
       .centered {
         margin-left: auto;
@@ -76,9 +95,16 @@
         display: flex;
         place-self: stretch;
       }
+      .flex {
+        display: flex;
+      }
     </style>
   </head>
   <body>
+    <div class="nav-bar centered flex gap-0_5">
+      <a class="button" href="#exam" id="examLink">Exam mode</a>
+      <a class="button" href="#list" id="listLink">Word list</a>
+    </div>
     <div class="content centered rounded-xl">
       <div id="app"></div>
     </div>

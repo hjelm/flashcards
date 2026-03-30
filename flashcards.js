@@ -1,17 +1,25 @@
-const wordList = [
-  { bul: "дразнещ", eng: "irritating" },
-  { bul: "тъкмо", eng: "just now" },
-  { bul: "поздравления", eng: "congratulations" },
-  { bul: "споделяне", eng: "share" },
-  { bul: "скучно", eng: "bored" },
-  { bul: "доволен", eng: "satisfied" },
+const collection = [
+  {
+    name: "",
+    list: [
+      { bul: "дразнещ", eng: "irritating" },
+      { bul: "тъкмо", eng: "just now" },
+      { bul: "поздравления", eng: "congratulations" },
+      { bul: "споделяне", eng: "share" },
+      { bul: "скучно", eng: "bored" },
+      { bul: "доволен", eng: "satisfied" },
+    ],
+  },
 ];
+let selectedList = 0;
+const wordList = [...collection[selectedList].list];
 const total = wordList.length;
 let score = 0;
 const mistakeList = [];
 let answerInputBgColor = "#aaa";
 let answerInput;
 let outcome = "";
+let hash = location.hash.replace("#", "") || "exam";
 
 const getRandomWord = () => {
   if (wordList.length === 0) {
@@ -54,9 +62,33 @@ const checkAnswer = () => {
   answerInput.focus();
 };
 
+navigation.onnavigate = (e) => {
+  hash = new URLPattern(e.destination.url).hash;
+  updateUI();
+};
+location.onnavigate = (e) => {
+  console.log(e);
+};
+
 function updateUI() {
   let content;
-  if (!currentWord) {
+  document.getElementById("listLink").style.textDecoration = "unset";
+  document.getElementById("examLink").style.textDecoration = "underline";
+  if (hash === "list") {
+    content = `
+      <table style="font-size: 2rem;">
+        <thead>
+        <td style="border-bottom: solid">Bulgarian</td>
+        <td style="border-bottom: solid">English</td>
+        </thead>
+        <tbody>
+        ${collection[selectedList].list.map((w) => `<tr><td>${w.bul}</td><td>${w.eng}</td></tr>`).join("\n")}
+        </tbody>
+      </table>
+    `;
+    document.getElementById("listLink").style.textDecoration = "underline";
+    document.getElementById("examLink").style.textDecoration = "unset";
+  } else if (!currentWord) {
     content = `
       <p>No uncompleted words exists on the current list.<br/>
       Refresh your browser to start over again.</p>
@@ -65,7 +97,7 @@ function updateUI() {
       content += `
         <div class="list-title">Your mistakes:</div>
         <ul>
-        ${mistakeList.map((e) => `<li>You wrote "${e.answer}", correct is "${e.bul}"</li>`).join("\n")}
+        ${mistakeList.map((m) => `<li>For ${m.eng} you wrote "${m.answer}", correct is "${m.bul}"</li>`).join("\n")}
         <ul>
         `;
   } else {
@@ -94,8 +126,8 @@ function updateUI() {
       </div>
     `;
   }
-
   document.getElementById("app").innerHTML = content;
+
   const answerForm = document.getElementById("answerForm");
   if (answerForm) {
     answerForm.onsubmit = (e) => {
@@ -104,7 +136,7 @@ function updateUI() {
     };
   }
   answerInput = document.getElementById("answerInput");
-  if (currentWord) {
+  if (currentWord && answerInput) {
     answerInput.focus();
   }
 }
