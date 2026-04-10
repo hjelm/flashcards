@@ -2,14 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="src/style.css" />
     <title>Flash Cards</title>
   </head>
   <body>
     <header class="nav-bar centered flex gap-0_5">
-      <a class="button" href="#exam" id="examLink">Exam mode</a>
-      <a class="button" href="#list" id="listLink">View wordlist</a>
+      <a class="button nav-link" href="/" id="examLink">Exam mode</a>
+      <a class="button nav-link" href="/main" id="mainLink">Main</a>
+      <a class="button nav-link" href="/list" id="listLink">View wordlist</a>
     </header>
     <div class="content centered rounded-xl">
       <div id="app"></div>

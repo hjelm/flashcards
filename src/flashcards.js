@@ -1,4 +1,3 @@
-import "./style.css";
 import { createEffect, createSignal } from "./signals.js";
 
 const collection = [
@@ -20,13 +19,9 @@ const total = wordList.length;
 let score = 0;
 const mistakeList = [];
 let answerInput;
-let hash = location.hash.replace("#", "") || "exam";
 const [answerInputBgColor, setAnswerInputBgColor] = createSignal("#aaa");
 const [currentWord, setCurrentWord] = createSignal();
 const [outcome, setOutcome] = createSignal("");
-document.setAnswerInputBgColor = setAnswerInputBgColor;
-document.setCurrentWord = setCurrentWord;
-document.setOutcome = setOutcome;
 
 const getRandomWord = () => {
   if (wordList.length === 0) {
@@ -43,6 +38,7 @@ const nextWord = () => {
   setOutcome("");
   setCurrentWord(getRandomWord());
   if (currentWord()) answerInput.focus();
+  else navigateToRoute("/results");
 };
 
 const checkAnswer = () => {
@@ -78,63 +74,55 @@ const diffAnswer = (answer, target) => {
   return `<span class="ok">${ok}</span><span class="bad">${bad}</span>`;
 };
 
-navigation.onnavigate = (e) => {
-  hash = new URLPattern(e.destination.url).hash;
-  updateUI();
-};
-location.onnavigate = (e) => {
-  console.log(e);
+const ListPage = () => `
+  <table style="font-size: 2rem;">
+    <thead>
+      <td style="border-bottom: solid">Bulgarian</td>
+      <td style="border-bottom: solid">English</td>
+    </thead>
+    <tbody>
+      ${collection[selectedList].list
+        .map((w) => `<tr><td>${w.bul}</td><td>${w.eng}</td></tr>`)
+        .join("\n")}
+    </tbody>
+  </table>
+`;
+
+const MainPage = () => `
+  <div>
+    <h1>This is main</h1>
+  </div>
+`;
+
+const ResultsPage = () => {
+  let content = ` <p>All words have been covered.</p> `;
+  if (mistakeList.length > 0)
+    content += `
+    <div class="list-title">Your mistakes:</div>
+    <ul>
+      ${mistakeList
+        .map(
+          (m) => `
+        <li><span class="text-xl">${m.eng}:</span> you wrote<br>
+        <span class="text-xl">"${m.answer}"</span>, correct is<br>
+        <span class="text-xl">"${m.bul}"</span></li>`,
+        )
+        .join("\n")}
+    </ul>
+  `;
+  content += `<p>Refresh your browser to start over again.</p>`;
+  return content;
 };
 
-function html(strings, ...values) {
-  const template = document.createElement("template");
-  template.innerHTML = String.raw(strings, ...values);
-  return template.content;
-}
-
-function updateUI() {
+const ExamPage = () => {
   let content;
-  document.getElementById("listLink").style.textDecoration = "unset";
-  document.getElementById("examLink").style.textDecoration = "underline";
-  if (hash === "list") {
-    content = html`
-      <table style="font-size: 2rem;">
-        <thead>
-          <td style="border-bottom: solid">Bulgarian</td>
-          <td style="border-bottom: solid">English</td>
-        </thead>
-        <tbody>
-          ${collection[selectedList].list
-            .map((w) => `<tr><td>${w.bul}</td><td>${w.eng}</td></tr>`)
-            .join("\n")}
-        </tbody>
-      </table>
-    `;
-    document.getElementById("listLink").style.textDecoration = "underline";
-    document.getElementById("examLink").style.textDecoration = "unset";
-  } else if (!currentWord()) {
-    content = html` <p>All words have been covered.</p> `;
-    if (mistakeList.length > 0)
-      content.append(html`
-        <div class="list-title">Your mistakes:</div>
-        <ul>
-          ${mistakeList
-            .map(
-              (m) => `
-          <li><span class="text-xl">${m.eng}:</span> you wrote<br>
-          <span class="text-xl">"${m.answer}"</span>, correct is<br>
-          <span class="text-xl">"${m.bul}"</span></li>`,
-            )
-            .join("\n")}
-        </ul>
-        <p>Refresh your browser to start over again.</p>
-      `);
+  if (!currentWord()) {
   } else {
-    content = html`
+    content = `
       <div
         id="currentWord"
         class="self-center text-lg text-gray pb-1 primary"
-      ></div>
+      >${currentWord()?.eng || ""}</div>
       <div class="py-1 self-center">How do you write that in Bulgarian?</div>
       <form id="answerForm">
         <div>
@@ -144,14 +132,28 @@ function updateUI() {
             class="rounded-sm place-stretch px-0_5 items-center border-none"
             id="answerInput"
           />
-          <div id="outcome" class="self-center mt-1"></div>
+          <div id="outcome" class="self-center mt-1">${outcome()}</div>
         </div>
       </form>
       <div class="self-center">Remaining words: ${wordList.length}</div>
       <div class="self-center py-1">Score: ${score}/${total}</div>
     `;
   }
-  document.getElementById("app").replaceChildren(content);
+  return content;
+};
+
+const routes = {
+  "/": ExamPage(),
+  "/main": MainPage(),
+  "/results": ResultsPage(),
+  "/list": ListPage(),
+};
+
+const renderContent = (route) => {
+  const page = routes[route];
+  if (page === undefined) return "<h1>404 Not Found</h1>";
+  const app = document.getElementById("app");
+  app.innerHTML = page;
 
   const answerForm = document.getElementById("answerForm");
   if (answerForm) {
@@ -164,19 +166,43 @@ function updateUI() {
   if (currentWord() && answerInput) {
     answerInput.focus();
   }
-}
-updateUI();
+};
+
+const navigateToRoute = (route) => {
+  window.history.pushState({}, "", route);
+  renderContent(route);
+};
+
+const navigate = (event) => {
+  event.preventDefault();
+  const route = event.target.getAttribute("href");
+  navigateToRoute(route);
+};
+
+document.querySelectorAll(".nav-link").forEach((link) => {
+  link.addEventListener("click", navigate);
+});
+
+window.onpopstate = () => {
+  console.log("onpopstate", window.location.pathname);
+  renderContent(window.location.pathname);
+};
+
+// Initial render
+renderContent(window.location.pathname);
 
 createEffect(() => {
   const tag = document.getElementById("currentWord");
   if (tag) tag.textContent = currentWord()?.eng || "";
   console.log("currentWord updated", currentWord());
 });
+
 createEffect(() => {
   const tag = document.getElementById("outcome");
   if (tag) tag.textContent = outcome() || "";
   console.log("outcome updated", outcome());
 });
+
 createEffect(() => {
   const tag = document.getElementById("answerInput");
   if (tag) tag.style.backgroundColor = answerInputBgColor();
