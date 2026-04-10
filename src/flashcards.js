@@ -1,4 +1,5 @@
 import "./style.css";
+import { createEffect, createSignal } from "./signals.js";
 
 const collection = [
   {
@@ -18,48 +19,48 @@ const wordList = [...collection[selectedList].list];
 const total = wordList.length;
 let score = 0;
 const mistakeList = [];
-let answerInputBgColor = "#aaa";
 let answerInput;
-let outcome = "";
 let hash = location.hash.replace("#", "") || "exam";
+const [answerInputBgColor, setAnswerInputBgColor] = createSignal("#aaa");
+const [currentWord, setCurrentWord] = createSignal();
+const [outcome, setOutcome] = createSignal("");
+document.setAnswerInputBgColor = setAnswerInputBgColor;
+document.setCurrentWord = setCurrentWord;
+document.setOutcome = setOutcome;
 
 const getRandomWord = () => {
   if (wordList.length === 0) {
-    currentWord = undefined;
+    setCurrentWord(undefined);
     return;
   }
   const index = Math.round(Math.random() * (wordList.length - 1));
   return wordList.splice(index, 1).pop();
 };
-
-let currentWord = getRandomWord();
+setCurrentWord(getRandomWord());
 
 const nextWord = () => {
   answerInput.value = "";
-  outcome = "";
-  currentWord = getRandomWord();
-  updateUI();
-  if (currentWord) answerInput.focus();
+  setOutcome("");
+  setCurrentWord(getRandomWord());
+  if (currentWord()) answerInput.focus();
 };
 
 const checkAnswer = () => {
   const answer = answerInput.value;
-  if (!answer) outcome = "";
-  else if (answer.toLowerCase() === currentWord.bul.toLowerCase()) {
-    outcome = "correct!";
-    answerInputBgColor = "green";
+  if (!answer) setOutcome("");
+  else if (answer.toLowerCase() === currentWord().bul.toLowerCase()) {
+    setOutcome("correct!");
+    setAnswerInputBgColor("green");
     score = score + 1;
   } else {
-    outcome = `"${diffAnswer(answer, currentWord.bul)}" is incorrect.`;
-    answerInputBgColor = "red";
-    mistakeList.push({ ...currentWord, answer: answer });
+    setOutcome(`"${answer}" is incorrect.`);
+    setAnswerInputBgColor("red");
+    mistakeList.push({ ...currentWord(), answer: answer });
   }
   setTimeout(() => {
     nextWord();
-    answerInputBgColor = "#aaa";
-    updateUI();
+    setAnswerInputBgColor("#aaa");
   }, 700);
-  updateUI();
   answerInput.value = answer;
   answerInput.focus();
 };
@@ -111,7 +112,7 @@ function updateUI() {
     `;
     document.getElementById("listLink").style.textDecoration = "underline";
     document.getElementById("examLink").style.textDecoration = "unset";
-  } else if (!currentWord) {
+  } else if (!currentWord()) {
     content = html` <p>All words have been covered.</p> `;
     if (mistakeList.length > 0)
       content.append(html`
@@ -121,7 +122,7 @@ function updateUI() {
             .map(
               (m) => `
           <li><span class="text-xl">${m.eng}:</span> you wrote<br>
-          <span class="text-xl">"${diffAnswer(m.answer, m.bul)}"</span>, correct is<br>
+          <span class="text-xl">"${m.answer}"</span>, correct is<br>
           <span class="text-xl">"${m.bul}"</span></li>`,
             )
             .join("\n")}
@@ -130,9 +131,10 @@ function updateUI() {
       `);
   } else {
     content = html`
-      <div class="self-center text-lg text-gray pb-1 primary">
-        ${currentWord.eng || ""}
-      </div>
+      <div
+        id="currentWord"
+        class="self-center text-lg text-gray pb-1 primary"
+      ></div>
       <div class="py-1 self-center">How do you write that in Bulgarian?</div>
       <form id="answerForm">
         <div>
@@ -140,10 +142,9 @@ function updateUI() {
             type="text"
             placeholder="Enter answer"
             class="rounded-sm place-stretch px-0_5 items-center border-none"
-            style="background-color: ${answerInputBgColor}"
             id="answerInput"
           />
-          <div class="self-center mt-1">${outcome}</div>
+          <div id="outcome" class="self-center mt-1"></div>
         </div>
       </form>
       <div class="self-center">Remaining words: ${wordList.length}</div>
@@ -160,8 +161,24 @@ function updateUI() {
     };
   }
   answerInput = document.getElementById("answerInput");
-  if (currentWord && answerInput) {
+  if (currentWord() && answerInput) {
     answerInput.focus();
   }
 }
 updateUI();
+
+createEffect(() => {
+  const tag = document.getElementById("currentWord");
+  if (tag) tag.textContent = currentWord()?.eng || "";
+  console.log("currentWord updated", currentWord());
+});
+createEffect(() => {
+  const tag = document.getElementById("outcome");
+  if (tag) tag.textContent = outcome() || "";
+  console.log("outcome updated", outcome());
+});
+createEffect(() => {
+  const tag = document.getElementById("answerInput");
+  if (tag) tag.style.backgroundColor = answerInputBgColor();
+  console.log("answerInputBgColor updated", answerInputBgColor());
+});
