@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 56">
+  <!-- Back card -->
+  <rect x="16" y="6" width="32" height="44" rx="6"
+        fill="#bbb" stroke="#444" stroke-width="2"
+        transform="rotate(20 32 28)"/>
+
+  <!-- Front card -->
+  <rect x="2" y="2" width="36" height="52" rx="8"
+        fill="#eee" stroke="#444" stroke-width="2"/>
+
+
+  <!-- Text -->
+  <text x="20" y="34"
+        text-anchor="middle"
+        font-size="22"
+        font-weight="700"
+        font-family="Arial, sans-serif"
+        fill="#444">
+    Да
+  </text>
+
+</svg>
