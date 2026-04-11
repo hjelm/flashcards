@@ -15,13 +15,13 @@ const collection = [
   },
 ];
 let selectedList = 0;
-let score = 0;
 const mistakeList = [];
 let answerInput;
 const [wordList, setWordList] = createSignal([
   ...collection[selectedList].list,
 ]);
 const total = wordList().length;
+const [score, setScore] = createSignal(0);
 const [answerInputBgColor, setAnswerInputBgColor] = createSignal("#aaa");
 const [currentWord, setCurrentWord] = createSignal();
 const [outcome, setOutcome] = createSignal("");
@@ -52,7 +52,7 @@ const checkAnswer = () => {
   else if (answer.toLowerCase() === currentWord()?.bul.toLowerCase()) {
     setOutcome("correct!");
     setAnswerInputBgColor("green");
-    score = score + 1;
+    setScore((prev) => prev + 1);
   } else {
     setOutcome(`"${answer}" is incorrect.`);
     setAnswerInputBgColor("red");
@@ -132,7 +132,7 @@ const ExamPage = () => html`
   <div class="self-center">
     Remaining words: <span id="remainingWords">${wordList().length}</span>
   </div>
-  <div class="self-center py-1">Score: ${score}/${total}</div>
+  <div id="score" class="self-center py-1">Score: ${score()}/${total}</div>
 `;
 
 createEffect(() => {
@@ -158,6 +158,12 @@ createEffect(() => {
   if (tag) tag.textContent = wordList().length;
   console.log("wordList updated", wordList());
   console.log("remainingWords updated", wordList().length);
+});
+
+createEffect(() => {
+  const tag = document.getElementById("score");
+  if (tag) tag.textContent = `Score: ${score()}/${total}`;
+  console.log("score updated", score());
 });
 
 const routes = {
