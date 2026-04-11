@@ -1,5 +1,4 @@
-import { createState } from "./state.js";
-import { html, highlightDiff } from "./html.js";
+import { createState, html, highlightDiff } from "./core.js";
 
 const collection = [
   {
@@ -17,7 +16,6 @@ const collection = [
 
 let answerInput;
 let selectedList = 0;
-let currentPage;
 const mistakeList = [];
 const wordList = createState([...collection[selectedList].list]);
 const total = wordList.value.length;
@@ -190,6 +188,7 @@ const routes = {
   "/list": ListPage,
 };
 
+let currentPage;
 const renderContent = (route) => {
   if (currentPage?.onDisconnected) currentPage.onDisconnected();
   currentPage =
