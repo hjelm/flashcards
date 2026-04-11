@@ -135,6 +135,31 @@ const ExamPage = () => html`
   <div class="self-center py-1">Score: ${score}/${total}</div>
 `;
 
+createEffect(() => {
+  const tag = document.getElementById("currentWord");
+  if (tag) tag.textContent = currentWord()?.eng || "";
+  console.log("currentWord updated", currentWord());
+});
+
+createEffect(() => {
+  const tag = document.getElementById("answerInput");
+  if (tag) tag.style.backgroundColor = answerInputBgColor();
+  console.log("answerInputBgColor updated", answerInputBgColor());
+});
+
+createEffect(() => {
+  const tag = document.getElementById("outcome");
+  if (tag) tag.textContent = outcome() || "";
+  console.log("outcome updated", outcome());
+});
+
+createEffect(() => {
+  const tag = document.getElementById("remainingWords");
+  if (tag) tag.textContent = wordList().length;
+  console.log("wordList updated", wordList());
+  console.log("remainingWords updated", wordList().length);
+});
+
 const routes = {
   "/": ExamPage,
   "/results": ResultsPage,
@@ -181,28 +206,3 @@ window.onpopstate = () => {
 
 // Initial render
 renderContent(window.location.pathname);
-
-createEffect(() => {
-  const tag = document.getElementById("currentWord");
-  if (tag) tag.textContent = currentWord()?.eng || "";
-  console.log("currentWord updated", currentWord());
-});
-
-createEffect(() => {
-  const tag = document.getElementById("outcome");
-  if (tag) tag.textContent = outcome() || "";
-  console.log("outcome updated", outcome());
-});
-
-createEffect(() => {
-  const tag = document.getElementById("answerInput");
-  if (tag) tag.style.backgroundColor = answerInputBgColor();
-  console.log("answerInputBgColor updated", answerInputBgColor());
-});
-
-createEffect(() => {
-  const tag = document.getElementById("remainingWords");
-  if (tag) tag.textContent = wordList().length;
-  console.log("wordList updated", wordList());
-  console.log("remainingWords updated", wordList().length);
-});
