@@ -14,22 +14,26 @@ const collection = [
   },
 ];
 let selectedList = 0;
-const wordList = [...collection[selectedList].list];
-const total = wordList.length;
 let score = 0;
 const mistakeList = [];
 let answerInput;
+const [wordList, setWordList] = createSignal([
+  ...collection[selectedList].list,
+]);
+const total = wordList().length;
 const [answerInputBgColor, setAnswerInputBgColor] = createSignal("#aaa");
 const [currentWord, setCurrentWord] = createSignal();
 const [outcome, setOutcome] = createSignal("");
 
 const getRandomWord = () => {
-  if (wordList.length === 0) {
+  if (wordList().length === 0) {
     setCurrentWord(undefined);
     return;
   }
-  const index = Math.round(Math.random() * (wordList.length - 1));
-  return wordList.splice(index, 1).pop();
+  const index = Math.floor(Math.random() * wordList().length);
+  const randomWord = wordList()[index];
+  setWordList((prev) => prev.filter((_, i) => i !== index));
+  return randomWord;
 };
 setCurrentWord(getRandomWord());
 
@@ -44,7 +48,7 @@ const nextWord = () => {
 const checkAnswer = () => {
   const answer = answerInput.value;
   if (!answer) setOutcome("");
-  else if (answer.toLowerCase() === currentWord().bul.toLowerCase()) {
+  else if (answer.toLowerCase() === currentWord()?.bul.toLowerCase()) {
     setOutcome("correct!");
     setAnswerInputBgColor("green");
     score = score + 1;
@@ -114,43 +118,37 @@ const ResultsPage = () => {
   return content;
 };
 
-const ExamPage = () => {
-  let content;
-  if (!currentWord()) {
-  } else {
-    content = `
-      <div
-        id="currentWord"
-        class="self-center text-lg text-gray pb-1 primary"
-      >${currentWord()?.eng || ""}</div>
-      <div class="py-1 self-center">How do you write that in Bulgarian?</div>
-      <form id="answerForm">
-        <div>
-          <input
-            type="text"
-            placeholder="Enter answer"
-            class="rounded-sm place-stretch px-0_5 items-center border-none"
-            id="answerInput"
-          />
-          <div id="outcome" class="self-center mt-1">${outcome()}</div>
-        </div>
-      </form>
-      <div class="self-center">Remaining words: ${wordList.length}</div>
-      <div class="self-center py-1">Score: ${score}/${total}</div>
-    `;
-  }
-  return content;
-};
+const ExamPage = () => `
+  <div id="currentWord" class="self-center text-lg text-gray pb-1 primary">
+    ${currentWord()?.eng || ""}
+  </div>
+  <div class="py-1 self-center">How do you write that in Bulgarian?</div>
+  <form id="answerForm">
+    <div>
+      <input
+        type="text"
+        placeholder="Enter answer"
+        class="rounded-sm place-stretch px-0_5 items-center border-none"
+        id="answerInput"
+      />
+      <div id="outcome" class="self-center mt-1">${outcome()}</div>
+    </div>
+  </form>
+  <div class="self-center">
+    Remaining words: <span id="remainingWords">${wordList().length}</span>
+  </div>
+  <div class="self-center py-1">Score: ${score}/${total}</div>
+`;
 
 const routes = {
-  "/": ExamPage(),
-  "/main": MainPage(),
-  "/results": ResultsPage(),
-  "/list": ListPage(),
+  "/": ExamPage,
+  "/main": MainPage,
+  "/results": ResultsPage,
+  "/list": ListPage,
 };
 
 const renderContent = (route) => {
-  const page = routes[route];
+  const page = routes[route]();
   if (page === undefined) return "<h1>404 Not Found</h1>";
   const app = document.getElementById("app");
   app.innerHTML = page;
@@ -184,7 +182,6 @@ document.querySelectorAll(".nav-link").forEach((link) => {
 });
 
 window.onpopstate = () => {
-  console.log("onpopstate", window.location.pathname);
   renderContent(window.location.pathname);
 };
 
@@ -207,4 +204,11 @@ createEffect(() => {
   const tag = document.getElementById("answerInput");
   if (tag) tag.style.backgroundColor = answerInputBgColor();
   console.log("answerInputBgColor updated", answerInputBgColor());
+});
+
+createEffect(() => {
+  const tag = document.getElementById("remainingWords");
+  if (tag) tag.textContent = wordList().length;
+  console.log("wordList updated", wordList());
+  console.log("remainingWords updated", wordList().length);
 });
