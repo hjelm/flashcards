@@ -1,5 +1,5 @@
 import { createEffect, createSignal } from "./signals.js";
-import { html } from "./html.js";
+import { html, highlightDiff } from "./html.js";
 
 const collection = [
   {
@@ -54,7 +54,7 @@ const checkAnswer = () => {
     setAnswerInputBgColor("green");
     setScore((prev) => prev + 1);
   } else {
-    setOutcome(`"${answer}" is incorrect.`);
+    setOutcome(`${highlightDiff(currentWord()?.bul, answer)} is incorrect.`);
     setAnswerInputBgColor("red");
     mistakeList.push({ ...currentWord(), answer: answer });
   }
@@ -64,19 +64,6 @@ const checkAnswer = () => {
   }, 700);
   answerInput.value = answer;
   answerInput.focus();
-};
-
-const diffAnswer = (answer, target) => {
-  let ok = "";
-  let bad = "";
-  for (i in answer) {
-    if (answer[i] === target[i]) ok += answer[i];
-    else {
-      bad = answer.substring(i + 1);
-      break;
-    }
-  }
-  return `<span class="ok">${ok}</span><span class="bad">${bad}</span>`;
 };
 
 const ListPage = () => html`
@@ -96,20 +83,20 @@ const ListPage = () => html`
 const ResultsPage = () => {
   let content = html`<p>All words have been covered.</p> `;
   if (mistakeList.length > 0)
-    content.append(html`
+    content += html`
       <div class="list-title">Your mistakes:</div>
       <ul>
         ${mistakeList
           .map(
             (m) => `
         <li><span class="text-xl">${m.eng}:</span> you wrote<br>
-        <span class="text-xl">"${m.answer}"</span>, correct is<br>
+        <span class="text-xl">"${highlightDiff(m.bul, m.answer)}"</span>, correct is<br>
         <span class="text-xl">"${m.bul}"</span></li>`,
           )
           .join("\n")}
       </ul>
-    `);
-  content.append(html`<p>Refresh your browser to start over again.</p>`);
+    `;
+  content += html`<button id="restartButton">Restart exam</button>`;
   return content;
 };
 
@@ -149,7 +136,7 @@ createEffect(() => {
 
 createEffect(() => {
   const tag = document.getElementById("outcome");
-  if (tag) tag.textContent = outcome() || "";
+  if (tag) tag.innerHTML = outcome() || "";
   console.log("outcome updated", outcome());
 });
 
@@ -176,7 +163,7 @@ const renderContent = (route) => {
   const page = routes[route]();
   if (page === undefined) return html`<h1>404 Not Found</h1>`;
   const app = document.getElementById("app");
-  app.replaceChildren(page);
+  app.innerHTML = page;
 
   const answerForm = document.getElementById("answerForm");
   if (answerForm) {
@@ -188,6 +175,18 @@ const renderContent = (route) => {
   answerInput = document.getElementById("answerInput");
   if (currentWord() && answerInput) {
     answerInput.focus();
+  }
+
+  let restartButton = document.getElementById("restartButton");
+  if (restartButton) {
+    restartButton.onclick = () => {
+      mistakeList.length = 0;
+      setWordList([...collection[selectedList].list]);
+      setScore(0);
+      setOutcome("");
+      setCurrentWord(getRandomWord());
+      navigateToRoute("/");
+    };
   }
 };
 
