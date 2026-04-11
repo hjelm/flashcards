@@ -1,14 +1,18 @@
 /**
- * Tagged template literal that parses an HTML string into another HTML string.
+ * Tagged template literal that parses an HTML string into a DocumentFragment.
  *
  * @example
  * node.innerHtml = html`<h1>Hello, ${name}!</h1>`;
  *
  * @param {TemplateStringsArray} strings - The static string parts of the template literal.
  * @param {...unknown} values - The interpolated values.
- * @returns {string} - The output HTML string.
+ * @returns {DocumentFragment}
  */
-export const html = (strings, ...values) => String.raw(strings, ...values);
+export function html(strings, ...values) {
+  const template = document.createElement("template");
+  template.innerHTML = String.raw(strings, ...values);
+  return template.content;
+}
 
 /**
  * Compares two strings and returns a DocumentFragment where characters in

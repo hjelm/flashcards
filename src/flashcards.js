@@ -66,24 +66,26 @@ const checkAnswer = () => {
   answerInput.focus();
 };
 
-const ListPage = () => html`
-  <table style="font-size: 2rem;">
-    <thead>
-      <td style="border-bottom: solid">Bulgarian</td>
-      <td style="border-bottom: solid">English</td>
-    </thead>
-    <tbody>
-      ${collection[selectedList].list
-        .map((w) => `<tr><td>${w.bul}</td><td>${w.eng}</td></tr>`)
-        .join("\n")}
-    </tbody>
-  </table>
-`;
+const ListPage = () => ({
+  content: html`
+    <table style="font-size: 2rem;">
+      <thead>
+        <td style="border-bottom: solid">Bulgarian</td>
+        <td style="border-bottom: solid">English</td>
+      </thead>
+      <tbody>
+        ${collection[selectedList].list
+          .map((w) => `<tr><td>${w.bul}</td><td>${w.eng}</td></tr>`)
+          .join("\n")}
+      </tbody>
+    </table>
+  `,
+});
 
 const ResultsPage = () => {
   let content = html`<p>All words have been covered.</p> `;
   if (mistakeList.length > 0)
-    content += html`
+    content.append(html`
       <div class="list-title">Your mistakes:</div>
       <ul>
         ${mistakeList
@@ -95,32 +97,57 @@ const ResultsPage = () => {
           )
           .join("\n")}
       </ul>
-    `;
-  content += html`<button id="restartButton">Restart exam</button>`;
-  return content;
+    `);
+  content.append(html`<button id="restartButton">Restart exam</button>`);
+
+  const connected = () => {
+    document.getElementById("restartButton").onclick = () => {
+      mistakeList.length = 0;
+      setWordList([...collection[selectedList].list]);
+      setScore(0);
+      setOutcome("");
+      setCurrentWord(getRandomWord());
+      navigateToRoute("/");
+    };
+  };
+
+  return { content, connected };
 };
 
-const ExamPage = () => html`
-  <div id="currentWord" class="self-center text-lg text-gray pb-1 primary">
-    ${currentWord()?.eng || ""}
-  </div>
-  <div class="py-1 self-center">How do you write that in Bulgarian?</div>
-  <form id="answerForm">
-    <div>
-      <input
-        type="text"
-        placeholder="Enter answer"
-        class="rounded-sm place-stretch px-0_5 items-center border-none"
-        id="answerInput"
-      />
-      <div id="outcome" class="self-center mt-1">${outcome()}</div>
+const ExamPage = () => {
+  const content = html`
+    <div id="currentWord" class="self-center text-lg text-gray pb-1 primary">
+      ${currentWord()?.eng || ""}
     </div>
-  </form>
-  <div class="self-center">
-    Remaining words: <span id="remainingWords">${wordList().length}</span>
-  </div>
-  <div id="score" class="self-center py-1">Score: ${score()}/${total}</div>
-`;
+    <div class="py-1 self-center">How do you write that in Bulgarian?</div>
+    <form id="answerForm">
+      <div>
+        <input
+          type="text"
+          placeholder="Enter answer"
+          class="rounded-sm place-stretch px-0_5 items-center border-none"
+          id="answerInput"
+        />
+        <div id="outcome" class="self-center mt-1">${outcome()}</div>
+      </div>
+    </form>
+    <div class="self-center">
+      Remaining words: <span id="remainingWords">${wordList().length}</span>
+    </div>
+    <div id="score" class="self-center py-1">Score: ${score()}/${total}</div>
+  `;
+
+  const connected = () => {
+    document.getElementById("answerForm").onsubmit = (e) => {
+      e.preventDefault();
+      checkAnswer();
+    };
+    answerInput = document.getElementById("answerInput");
+    answerInput.focus();
+  };
+
+  return { content, connected };
+};
 
 createEffect(() => {
   const tag = document.getElementById("currentWord");
@@ -163,31 +190,8 @@ const renderContent = (route) => {
   const page = routes[route]();
   if (page === undefined) return html`<h1>404 Not Found</h1>`;
   const app = document.getElementById("app");
-  app.innerHTML = page;
-
-  const answerForm = document.getElementById("answerForm");
-  if (answerForm) {
-    answerForm.onsubmit = (e) => {
-      e.preventDefault();
-      checkAnswer();
-    };
-  }
-  answerInput = document.getElementById("answerInput");
-  if (currentWord() && answerInput) {
-    answerInput.focus();
-  }
-
-  let restartButton = document.getElementById("restartButton");
-  if (restartButton) {
-    restartButton.onclick = () => {
-      mistakeList.length = 0;
-      setWordList([...collection[selectedList].list]);
-      setScore(0);
-      setOutcome("");
-      setCurrentWord(getRandomWord());
-      navigateToRoute("/");
-    };
-  }
+  app.replaceChildren(page.content);
+  if (page.connected) page.connected();
 };
 
 const navigateToRoute = (route) => {
