@@ -1,4 +1,5 @@
 import { createEffect, createSignal } from "./signals.js";
+import { html } from "./html.js";
 
 const collection = [
   {
@@ -78,7 +79,7 @@ const diffAnswer = (answer, target) => {
   return `<span class="ok">${ok}</span><span class="bad">${bad}</span>`;
 };
 
-const ListPage = () => `
+const ListPage = () => html`
   <table style="font-size: 2rem;">
     <thead>
       <td style="border-bottom: solid">Bulgarian</td>
@@ -92,33 +93,27 @@ const ListPage = () => `
   </table>
 `;
 
-const MainPage = () => `
-  <div>
-    <h1>This is main</h1>
-  </div>
-`;
-
 const ResultsPage = () => {
-  let content = ` <p>All words have been covered.</p> `;
+  let content = html`<p>All words have been covered.</p> `;
   if (mistakeList.length > 0)
-    content += `
-    <div class="list-title">Your mistakes:</div>
-    <ul>
-      ${mistakeList
-        .map(
-          (m) => `
+    content.append(html`
+      <div class="list-title">Your mistakes:</div>
+      <ul>
+        ${mistakeList
+          .map(
+            (m) => `
         <li><span class="text-xl">${m.eng}:</span> you wrote<br>
         <span class="text-xl">"${m.answer}"</span>, correct is<br>
         <span class="text-xl">"${m.bul}"</span></li>`,
-        )
-        .join("\n")}
-    </ul>
-  `;
-  content += `<p>Refresh your browser to start over again.</p>`;
+          )
+          .join("\n")}
+      </ul>
+    `);
+  content.append(html`<p>Refresh your browser to start over again.</p>`);
   return content;
 };
 
-const ExamPage = () => `
+const ExamPage = () => html`
   <div id="currentWord" class="self-center text-lg text-gray pb-1 primary">
     ${currentWord()?.eng || ""}
   </div>
@@ -142,16 +137,15 @@ const ExamPage = () => `
 
 const routes = {
   "/": ExamPage,
-  "/main": MainPage,
   "/results": ResultsPage,
   "/list": ListPage,
 };
 
 const renderContent = (route) => {
   const page = routes[route]();
-  if (page === undefined) return "<h1>404 Not Found</h1>";
+  if (page === undefined) return html`<h1>404 Not Found</h1>`;
   const app = document.getElementById("app");
-  app.innerHTML = page;
+  app.replaceChildren(page);
 
   const answerForm = document.getElementById("answerForm");
   if (answerForm) {
