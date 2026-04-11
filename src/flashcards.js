@@ -187,10 +187,11 @@ const routes = {
 };
 
 const renderContent = (route) => {
-  const page = routes[route]();
-  if (page === undefined) return html`<h1>404 Not Found</h1>`;
-  const app = document.getElementById("app");
-  app.replaceChildren(page.content);
+  const page =
+    route in routes
+      ? routes[route]()
+      : { content: html`<h1>404 Not Found</h1>` };
+  document.getElementById("app").replaceChildren(page.content);
   if (page.connected) page.connected();
 };
 
