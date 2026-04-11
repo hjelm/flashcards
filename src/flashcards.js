@@ -38,34 +38,6 @@ const getRandomWord = () => {
 };
 setCurrentWord(getRandomWord());
 
-const nextWord = () => {
-  answerInput.value = "";
-  setOutcome("");
-  setCurrentWord(getRandomWord());
-  if (currentWord()) answerInput.focus();
-  else navigateToRoute("/results");
-};
-
-const checkAnswer = () => {
-  const answer = answerInput.value;
-  if (!answer) setOutcome("");
-  else if (answer.toLowerCase() === currentWord()?.bul.toLowerCase()) {
-    setOutcome("correct!");
-    setAnswerInputBgColor("green");
-    setScore((prev) => prev + 1);
-  } else {
-    setOutcome(`${highlightDiff(currentWord()?.bul, answer)} is incorrect.`);
-    setAnswerInputBgColor("red");
-    mistakeList.push({ ...currentWord(), answer: answer });
-  }
-  setTimeout(() => {
-    nextWord();
-    setAnswerInputBgColor("#aaa");
-  }, 700);
-  answerInput.value = answer;
-  answerInput.focus();
-};
-
 const ListPage = () => ({
   content: html`
     <table style="font-size: 2rem;">
@@ -136,6 +108,34 @@ const ExamPage = () => {
     </div>
     <div id="score" class="self-center py-1">Score: ${score()}/${total}</div>
   `;
+
+  const nextWord = () => {
+    answerInput.value = "";
+    setOutcome("");
+    setCurrentWord(getRandomWord());
+    if (currentWord()) answerInput.focus();
+    else navigateToRoute("/results");
+  };
+
+  const checkAnswer = () => {
+    const answer = answerInput.value;
+    if (!answer) setOutcome("");
+    else if (answer.toLowerCase() === currentWord()?.bul.toLowerCase()) {
+      setOutcome("correct!");
+      setAnswerInputBgColor("green");
+      setScore((prev) => prev + 1);
+    } else {
+      setOutcome(`${highlightDiff(currentWord()?.bul, answer)} is incorrect.`);
+      setAnswerInputBgColor("red");
+      mistakeList.push({ ...currentWord(), answer: answer });
+    }
+    setTimeout(() => {
+      nextWord();
+      setAnswerInputBgColor("#aaa");
+    }, 700);
+    answerInput.value = answer;
+    answerInput.focus();
+  };
 
   const connected = () => {
     document.getElementById("answerForm").onsubmit = (e) => {
