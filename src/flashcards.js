@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from "./signals.js";
+import { createState } from "./state.js";
 import { html, highlightDiff } from "./html.js";
 
 const collection = [
@@ -14,29 +14,29 @@ const collection = [
     ],
   },
 ];
-let selectedList = 0;
-const mistakeList = [];
+
 let answerInput;
-const [wordList, setWordList] = createSignal([
-  ...collection[selectedList].list,
-]);
-const total = wordList().length;
-const [score, setScore] = createSignal(0);
-const [answerInputBgColor, setAnswerInputBgColor] = createSignal("#aaa");
-const [currentWord, setCurrentWord] = createSignal();
-const [outcome, setOutcome] = createSignal("");
+let selectedList = 0;
+let currentPage;
+const mistakeList = [];
+const wordList = createState([...collection[selectedList].list]);
+const total = wordList.value.length;
+const score = createState(0);
+const answerInputBgColor = createState("#aaa");
+const currentWord = createState();
+const outcome = createState("");
 
 const getRandomWord = () => {
-  if (wordList().length === 0) {
-    setCurrentWord(undefined);
+  if (wordList.value.length === 0) {
+    currentWord.set(undefined);
     return;
   }
-  const index = Math.floor(Math.random() * wordList().length);
-  const randomWord = wordList()[index];
-  setWordList((prev) => prev.filter((_, i) => i !== index));
+  const index = Math.floor(Math.random() * wordList.value.length);
+  const randomWord = wordList.value[index];
+  wordList.set((prev) => prev.filter((_, i) => i !== index));
   return randomWord;
 };
-setCurrentWord(getRandomWord());
+currentWord.set(getRandomWord());
 
 const ListPage = () => ({
   content: html`
@@ -72,25 +72,26 @@ const ResultsPage = () => {
     `);
   content.append(html`<button id="restartButton">Restart exam</button>`);
 
-  const connected = () => {
+  const onConnected = () => {
     document.getElementById("restartButton").onclick = () => {
       mistakeList.length = 0;
-      setWordList([...collection[selectedList].list]);
-      setScore(0);
-      setOutcome("");
-      setCurrentWord(getRandomWord());
+      wordList.set([...collection[selectedList].list]);
+      score.set(0);
+      outcome.set("");
+      currentWord.set(getRandomWord());
       navigateToRoute("/");
     };
   };
 
-  return { content, connected };
+  return { content, onConnected };
 };
 
 const ExamPage = () => {
   const content = html`
-    <div id="currentWord" class="self-center text-lg text-gray pb-1 primary">
-      ${currentWord()?.eng || ""}
-    </div>
+    <div
+      id="currentWord"
+      class="self-center text-lg text-gray pb-1 primary"
+    ></div>
     <div class="py-1 self-center">How do you write that in Bulgarian?</div>
     <form id="answerForm">
       <div>
@@ -100,44 +101,74 @@ const ExamPage = () => {
           class="rounded-sm place-stretch px-0_5 items-center border-none"
           id="answerInput"
         />
-        <div id="outcome" class="self-center mt-1">${outcome()}</div>
+        <div id="outcome" class="self-center mt-1"></div>
       </div>
     </form>
     <div class="self-center">
-      Remaining words: <span id="remainingWords">${wordList().length}</span>
+      Remaining words: <span id="remainingWords"></span>
     </div>
-    <div id="score" class="self-center py-1">Score: ${score()}/${total}</div>
+    <div id="score" class="self-center py-1"></div>
   `;
 
   const nextWord = () => {
     answerInput.value = "";
-    setOutcome("");
-    setCurrentWord(getRandomWord());
-    if (currentWord()) answerInput.focus();
+    outcome.set("");
+    currentWord.set(getRandomWord());
+    if (currentWord.value) answerInput.focus();
     else navigateToRoute("/results");
   };
 
   const checkAnswer = () => {
     const answer = answerInput.value;
-    if (!answer) setOutcome("");
-    else if (answer.toLowerCase() === currentWord()?.bul.toLowerCase()) {
-      setOutcome("correct!");
-      setAnswerInputBgColor("green");
-      setScore((prev) => prev + 1);
+    if (!answer) outcome.set("");
+    else if (answer.toLowerCase() === currentWord.value?.bul.toLowerCase()) {
+      outcome.set("correct!");
+      answerInputBgColor.set("green");
+      score.set((prev) => prev + 1);
     } else {
-      setOutcome(`${highlightDiff(currentWord()?.bul, answer)} is incorrect.`);
-      setAnswerInputBgColor("red");
-      mistakeList.push({ ...currentWord(), answer: answer });
+      outcome.set(
+        `${highlightDiff(currentWord.value?.bul, answer)} is incorrect.`,
+      );
+      answerInputBgColor.set("red");
+      mistakeList.push({ ...currentWord.value, answer: answer });
     }
     setTimeout(() => {
       nextWord();
-      setAnswerInputBgColor("#aaa");
+      answerInputBgColor.set("#aaa");
     }, 700);
     answerInput.value = answer;
     answerInput.focus();
   };
 
-  const connected = () => {
+  let unsubscribe = [];
+
+  const onConnected = () => {
+    unsubscribe = [
+      currentWord.subscribe(() => {
+        document.getElementById("currentWord").textContent =
+          currentWord.value?.eng || "";
+      }),
+
+      outcome.subscribe(() => {
+        document.getElementById("outcome").innerHTML = outcome.value || "";
+      }),
+
+      score.subscribe(() => {
+        document.getElementById("score").textContent =
+          `Score: ${score.value}/${total}`;
+      }),
+
+      wordList.subscribe(() => {
+        document.getElementById("remainingWords").textContent =
+          wordList.value.length;
+      }),
+
+      answerInputBgColor.subscribe(() => {
+        document.getElementById("answerInput").style.backgroundColor =
+          answerInputBgColor.value;
+      }),
+    ];
+
     document.getElementById("answerForm").onsubmit = (e) => {
       e.preventDefault();
       checkAnswer();
@@ -146,39 +177,12 @@ const ExamPage = () => {
     answerInput.focus();
   };
 
-  return { content, connected };
+  const onDisconnected = () => {
+    unsubscribe.forEach((fn) => fn());
+  };
+
+  return { content, onConnected, onDisconnected };
 };
-
-createEffect(() => {
-  const tag = document.getElementById("currentWord");
-  if (tag) tag.textContent = currentWord()?.eng || "";
-  console.log("currentWord updated", currentWord());
-});
-
-createEffect(() => {
-  const tag = document.getElementById("answerInput");
-  if (tag) tag.style.backgroundColor = answerInputBgColor();
-  console.log("answerInputBgColor updated", answerInputBgColor());
-});
-
-createEffect(() => {
-  const tag = document.getElementById("outcome");
-  if (tag) tag.innerHTML = outcome() || "";
-  console.log("outcome updated", outcome());
-});
-
-createEffect(() => {
-  const tag = document.getElementById("remainingWords");
-  if (tag) tag.textContent = wordList().length;
-  console.log("wordList updated", wordList());
-  console.log("remainingWords updated", wordList().length);
-});
-
-createEffect(() => {
-  const tag = document.getElementById("score");
-  if (tag) tag.textContent = `Score: ${score()}/${total}`;
-  console.log("score updated", score());
-});
 
 const routes = {
   "/": ExamPage,
@@ -187,12 +191,13 @@ const routes = {
 };
 
 const renderContent = (route) => {
-  const page =
+  if (currentPage?.onDisconnected) currentPage.onDisconnected();
+  currentPage =
     route in routes
       ? routes[route]()
       : { content: html`<h1>404 Not Found</h1>` };
-  document.getElementById("app").replaceChildren(page.content);
-  if (page.connected) page.connected();
+  document.getElementById("app").replaceChildren(currentPage.content);
+  if (currentPage?.onConnected) currentPage.onConnected();
 };
 
 const navigateToRoute = (route) => {
