@@ -13,40 +13,55 @@ import {
   resetExam,
 } from "./state.js";
 
-const ListPage = () =>
-  createPage({
-    content: html`
-      <table style="font-size: 2rem;">
-        <thead>
-          <td style="border-bottom: solid">Bulgarian</td>
-          <td style="border-bottom: solid">English</td>
-        </thead>
-        <tbody>
-          ${vocabularies[selectedList.value].list
-            .map((w) => `<tr><td>${w.bul}</td><td>${w.eng}</td></tr>`)
-            .join("\n")}
-        </tbody>
-      </table>
-    `,
+const ListPage = () => {
+  const rows = vocabularies[selectedList.value].list.map((w) => {
+    const tr = document.createElement("tr");
+    tr.append(html`<td>${w.bul}</td>`, html`<td>${w.eng}</td>`);
+    return tr;
   });
 
+  const content = html`
+    <table style="font-size: 1rem;">
+      <thead>
+        <tr>
+          <td style="border-bottom: solid">Bulgarian</td>
+          <td style="border-bottom: solid">English</td>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  `;
+  content.querySelector("tbody").append(...rows);
+
+  return createPage({ content });
+};
+
 const ResultsPage = () => {
-  let content = html`<p>All words have been covered.</p> `;
-  if (mistakeList.value.length > 0)
-    content.append(html`
+  const fragment = new DocumentFragment();
+
+  fragment.append(html`<p>All words have been covered.</p>`);
+
+  if (mistakeList.value.length > 0) {
+    const items = mistakeList.value.map(
+      (m) => html`
+        <li>
+          <span class="text-xl">${m.eng}:</span> you wrote<br />
+          <span class="text-xl">${highlightDiff(m.bul, m.answer)}</span>,
+          correct is<br />
+          <span class="text-xl">${m.bul}</span>
+        </li>
+      `,
+    );
+
+    const list = html`
       <div class="list-title">Your mistakes:</div>
-      <ul>
-        ${mistakeList.value
-          .map(
-            (m) => `
-        <li><span class="text-xl">${m.eng}:</span> you wrote<br>
-        <span class="text-xl">"${highlightDiff(m.bul, m.answer)}"</span>, correct is<br>
-        <span class="text-xl">"${m.bul}"</span></li>`,
-          )
-          .join("\n")}
-      </ul>
-    `);
-  content.append(html`<button id="restartButton">Restart exam</button>`);
+      <ul></ul>
+    `;
+    list.querySelector("ul").append(...items);
+    fragment.append(list);
+  }
+
+  fragment.append(html`<button id="restartButton">Restart exam</button>`);
 
   const onConnected = () => {
     document.getElementById("restartButton").onclick = () => {
@@ -55,7 +70,7 @@ const ResultsPage = () => {
     };
   };
 
-  return createPage({ content, onConnected });
+  return createPage({ content: fragment, onConnected });
 };
 
 const ExamPage = () => {

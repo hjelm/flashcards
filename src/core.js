@@ -14,19 +14,37 @@ export const createPage = ({ content, onConnected, onDisconnected }) => ({
 });
 
 /**
- * Tagged template literal that parses an HTML string into a DocumentFragment.
+ * Tagged template literal that parses an HTML string into a DocumentFragment,
+ * safely interpolating strings, Nodes, and DocumentFragments.
  *
  * @example
- * node.innerHtml = html`<h1>Hello, ${name}!</h1>`;
+ * const name = "World";
+ * const node = html`<h1>Hello, ${name}!</h1>`;
  *
- * @param {TemplateStringsArray} strings - The static string parts of the template literal.
- * @param {...unknown} values - The interpolated values.
+ * const child = html`<strong>bold</strong>`;
+ * const parent = html`<p>This is ${child}!</p>`;
+ *
+ * @param {TemplateStringsArray} strings
+ * @param {...(string | number | Node | DocumentFragment)} values
  * @returns {DocumentFragment}
  */
 export function html(strings, ...values) {
-  const template = document.createElement("template");
-  template.innerHTML = String.raw(strings, ...values);
-  return template.content;
+  const fragment = new DocumentFragment();
+
+  strings.forEach((string, i) => {
+    fragment.append(document.createRange().createContextualFragment(string));
+
+    if (i < values.length) {
+      const value = values[i];
+      if (value instanceof Node) {
+        fragment.append(value);
+      } else {
+        fragment.append(document.createTextNode(String(value ?? "")));
+      }
+    }
+  });
+
+  return fragment;
 }
 
 /**
