@@ -3,7 +3,7 @@ import { diff, elements } from "../dom.js";
 import { createPage } from "../core.js";
 import { mistakeList, resetExam } from "../state.js";
 
-export const ResultsPage = () => {
+export default function ResultsPage() {
   const { p, div, ul, li, span, br, button } = elements;
   const spanXl = (text) => span({ className: "text-xl" }, text);
   return createPage({
@@ -38,4 +38,4 @@ export const ResultsPage = () => {
       ),
     ),
   });
-};
+}

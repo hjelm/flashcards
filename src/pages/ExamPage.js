@@ -11,7 +11,7 @@ import {
   outcome,
 } from "../state.js";
 
-export const ExamPage = () => {
+export default function ExamPage() {
   const { div, form, input, span, button } = elements;
 
   const answerInputEl = input({
@@ -60,9 +60,7 @@ export const ExamPage = () => {
   return createPage({
     content: div(
       div(
-        {
-          className: "self-center text-lg text-gray pb-1 primary",
-        },
+        { className: "self-center text-lg text-gray pb-1 primary" },
         () => currentWord.value?.eng || "",
       ),
       div(
@@ -95,4 +93,4 @@ export const ExamPage = () => {
       answerInputEl.focus();
     },
   });
-};
+}
