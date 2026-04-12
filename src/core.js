@@ -120,6 +120,22 @@ export const shuffle = (array) => {
   return result;
 };
 
+/**
+ * @typedef {string | number | Node | null | undefined} Child
+ */
+
+/**
+ * @typedef {Record<string, unknown>} Attrs
+ */
+
+/**
+ * Creates a DOM element with optional attributes and children.
+ *
+ * @param {string} tag - The HTML tag name.
+ * @param {Attrs | Child} [attrsOrChild] - Either an attributes object or the first child.
+ * @param {...Child} rest - Remaining children.
+ * @returns {HTMLElement}
+ */
 const element = (tag, attrsOrChild, ...rest) => {
   const hasAttrs =
     attrsOrChild !== null &&
@@ -133,6 +149,32 @@ const element = (tag, attrsOrChild, ...rest) => {
   return node;
 };
 
+/**
+ * A proxy object that exposes every HTML tag as a factory function.
+ * Each factory accepts an optional attributes object followed by any
+ * number of children (strings, numbers, or Nodes), and returns the
+ * corresponding `HTMLElement`.
+ *
+ * Attribute keys are assigned directly as DOM properties, so use
+ * camelCase where appropriate (e.g. `className`, `textContent`).
+ *
+ * @example
+ * const { div, p, button } = htmlTags;
+ *
+ * // Element with text content
+ * div("Hello world");
+ *
+ * // Element with attributes
+ * button({ className: "btn", disabled: true }, "Click me");
+ *
+ * // Nested elements
+ * div({ className: "card" },
+ *   p("First paragraph"),
+ *   p("Second paragraph"),
+ * );
+ *
+ * @type {Record<string, (attrsOrChild?: Attrs | Child, ...children: Child[]) => HTMLElement>}
+ */
 export const htmlTags = new Proxy(
   {},
   {
