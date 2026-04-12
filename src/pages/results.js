@@ -5,7 +5,6 @@ import { mistakeList, resetExam } from "../state.js";
 
 export const ResultsPage = () => {
   const { p, div, ul, li, span, br, button } = elements;
-  const restartButton = button("Restart exam");
   const spanXl = (text) => span({ className: "text-xl" }, text);
   return createPage({
     content: div(
@@ -28,13 +27,15 @@ export const ResultsPage = () => {
             ),
           ]
         : []),
-      restartButton,
+      button(
+        {
+          onClick: () => {
+            resetExam();
+            navigate("/");
+          },
+        },
+        "Restart exam",
+      ),
     ),
-    onConnected: () => {
-      restartButton.onclick = () => {
-        resetExam();
-        navigate("/");
-      };
-    },
   });
 };

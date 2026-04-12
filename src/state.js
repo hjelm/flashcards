@@ -1,6 +1,7 @@
 import { vocabularies } from "./vocabularies.js";
 import { shuffle } from "./core.js";
 
+let currentObserver = null;
 /**
  * Creates a stateful value with a subscription model for reactive updates.
  *
@@ -24,6 +25,7 @@ export const createState = (initialValue) => {
 
   const signal = {
     get value() {
+      currentObserver?.add(signal); // 👈 register this state as a dependency
       return value;
     },
     set(nextOrFn) {
@@ -40,6 +42,32 @@ export const createState = (initialValue) => {
   };
 
   return signal;
+};
+
+/**
+ * Runs `fn` while tracking which states it reads, then re-runs it
+ * whenever any of those states change. Returns an unsubscribe function.
+ *
+ * @param {() => unknown} fn
+ * @returns {() => void} unsubscribe
+ */
+export const track = (fn) => {
+  const deps = new Set();
+  currentObserver = deps;
+  fn();
+  currentObserver = null;
+
+  const unsubs = [...deps].map((state) =>
+    state.subscribe(() => {
+      if (node && !node.isConnected) {
+        unsubs.forEach((u) => u()); // auto-cleanup when detached
+        return;
+      }
+      fn();
+    }),
+  );
+
+  return () => unsubs.forEach((u) => u());
 };
 
 export const selectedList = createState(0);

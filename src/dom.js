@@ -1,3 +1,5 @@
+import { track } from "./state.js";
+
 /**
  * Tagged template literal that parses an HTML string into a DocumentFragment,
  * safely interpolating strings, Nodes, and DocumentFragments.
@@ -90,6 +92,33 @@ export const diff = (original, input) => {
 };
 
 /**
+ * Resolves a child value for appending to the DOM. If the child is a
+ * function, inserts a Text node initially and reactively updates it
+ * (or swaps the element) whenever its dependencies change.
+ *
+ * @param {Child | (() => Child)} child
+ * @returns {Node}
+ */
+const resolveChild = (child) => {
+  if (typeof child !== "function") return child;
+
+  // Render once to get the initial node
+  let node = toNode(child());
+
+  track(() => {
+    const newNode = toNode(child());
+    node.replaceWith(newNode);
+    node = newNode;
+  }, node);
+
+  return node;
+};
+
+// Small helper to coerce a value to a Node
+const toNode = (value) =>
+  value instanceof Node ? value : document.createTextNode(String(value ?? ""));
+
+/**
  * @typedef {string | number | Node | null | undefined} Child
  */
 
@@ -126,7 +155,7 @@ export const diff = (original, input) => {
  */
 export const fragment = (...children) => {
   const f = new DocumentFragment();
-  f.append(...children.filter((c) => c != null));
+  f.append(...children.filter((c) => c != null).map(resolveChild));
   return f;
 };
 
@@ -149,11 +178,16 @@ const element = (tag, attrsOrChild, ...rest) => {
   for (const [k, v] of Object.entries(attrs)) {
     if (k.startsWith("on") && typeof v === "function")
       node.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (typeof v === "function")
+      track(() => {
+        node[k] = v();
+      });
     else node[k] = v;
   }
-  node.append(...children);
+  node.append(...children.map(resolveChild));
   return node;
 };
+
 /**
  * A proxy object that exposes every HTML tag as a factory function.
  * Each factory accepts an optional attributes object followed by any

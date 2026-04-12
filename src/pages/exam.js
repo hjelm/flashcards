@@ -65,7 +65,6 @@ export const ExamPage = () => {
 
   return createPage({
     content: div(
-      button({ onClick: () => console.log("yes!") }, "Does it work?"),
       currentWordEl,
       div(
         { className: "py-1 self-center" },
