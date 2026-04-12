@@ -129,6 +129,39 @@ export const shuffle = (array) => {
  */
 
 /**
+ * Creates a `DocumentFragment` containing the given children.
+ *
+ * Accepts the same child types as `htmlTags` factory functions — strings,
+ * numbers, and Nodes — so it composes with them naturally. Useful when you
+ * need to group siblings without introducing a wrapper element.
+ *
+ * @example
+ * // Group siblings with no wrapper element
+ * parent.append(
+ *   fragment(
+ *     span("Hello"),
+ *     span("World"),
+ *   )
+ * );
+ *
+ * @example
+ * // Conditionally render a block
+ * const { div, p } = htmlTags;
+ * div(
+ *   p("Always visible"),
+ *   isLoggedIn ? fragment(p("Welcome back!"), logoutButton) : loginButton,
+ * );
+ *
+ * @param {...Child} children
+ * @returns {DocumentFragment}
+ */
+export const fragment = (...children) => {
+  const f = new DocumentFragment();
+  f.append(...children.filter((c) => c != null));
+  return f;
+};
+
+/**
  * Creates a DOM element with optional attributes and children.
  *
  * @param {string} tag - The HTML tag name.
