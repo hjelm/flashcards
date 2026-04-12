@@ -1,4 +1,5 @@
 import { vocabularies } from "./vocabularies.js";
+import { shuffle } from "./core.js";
 
 /**
  * Creates a stateful value with a subscription model for reactive updates.
@@ -41,30 +42,24 @@ export const createState = (initialValue) => {
   return signal;
 };
 
-export const getRandomWord = () => {
-  if (remainingWords.value.length === 0) {
-    currentWord.set(undefined);
-    return;
-  }
-  const index = Math.floor(Math.random() * remainingWords.value.length);
-  const randomWord = remainingWords.value[index];
-  remainingWords.set((prev) => prev.filter((_, i) => i !== index));
-  return randomWord;
-};
-
-export let selectedList = 0;
+export const selectedList = createState(0);
 export const mistakeList = createState([]);
-export const remainingWords = createState([...vocabularies[selectedList].list]);
+export const remainingWords = createState(
+  shuffle([...vocabularies[selectedList.value].list]),
+);
 export const total = remainingWords.value.length;
 export const score = createState(0);
-export const answerInputBgColor = createState("#aaa");
-export const currentWord = createState(getRandomWord());
 export const outcome = createState("");
+export const answerInputBgColor = createState("#aaa");
+export const currentWord = createState(remainingWords.value[0]);
+remainingWords.set((prev) => prev.slice(1));
 
 export const resetExam = () => {
-  mistakeList.value.length = 0;
-  remainingWords.set([...vocabularies[selectedList].list]);
   score.set(0);
   outcome.set("");
-  currentWord.set(getRandomWord());
+  mistakeList.set([]);
+  remainingWords.set(shuffle([...vocabularies[selectedList.value].list]));
+  const next = remainingWords.value[0];
+  remainingWords.set((prev) => prev.slice(1));
+  currentWord.set(next);
 };

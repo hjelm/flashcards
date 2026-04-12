@@ -10,7 +10,6 @@ import {
   currentWord,
   outcome,
   resetExam,
-  getRandomWord,
 } from "./state.js";
 
 const ListPage = () =>
@@ -22,7 +21,7 @@ const ListPage = () =>
           <td style="border-bottom: solid">English</td>
         </thead>
         <tbody>
-          ${vocabularies[selectedList].list
+          ${vocabularies[selectedList.value].list
             .map((w) => `<tr><td>${w.bul}</td><td>${w.eng}</td></tr>`)
             .join("\n")}
         </tbody>
@@ -87,8 +86,10 @@ const ExamPage = () => {
   const nextWord = () => {
     answerInput.value = "";
     outcome.set("");
-    currentWord.set(getRandomWord());
-    if (currentWord.value) answerInput.focus();
+    const next = remainingWords.value[0];
+    remainingWords.set((prev) => prev.slice(1));
+    currentWord.set(next);
+    if (next) answerInput.focus();
     else navigateToRoute("/results");
   };
 
