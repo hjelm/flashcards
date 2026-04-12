@@ -12,7 +12,7 @@ import {
 } from "../state.js";
 
 export const ExamPage = () => {
-  const { div, form, input, span } = elements;
+  const { div, form, input, span, button } = elements;
 
   const currentWordEl = div({
     className: "self-center text-lg text-gray pb-1 primary",
@@ -65,6 +65,7 @@ export const ExamPage = () => {
 
   return createPage({
     content: div(
+      button({ onClick: () => console.log("yes!") }, "Does it work?"),
       currentWordEl,
       div(
         { className: "py-1 self-center" },

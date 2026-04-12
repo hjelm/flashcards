@@ -146,11 +146,14 @@ const element = (tag, attrsOrChild, ...rest) => {
   const attrs = hasAttrs ? attrsOrChild : {};
   const children = hasAttrs ? rest : [attrsOrChild, ...rest];
   const node = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) node[k] = v;
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k.startsWith("on") && typeof v === "function")
+      node.addEventListener(k.slice(2).toLowerCase(), v);
+    else node[k] = v;
+  }
   node.append(...children);
   return node;
 };
-
 /**
  * A proxy object that exposes every HTML tag as a factory function.
  * Each factory accepts an optional attributes object followed by any
