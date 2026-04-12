@@ -13,6 +13,21 @@ import {
   resetExam,
 } from "./state.js";
 
+// Populate the vocab selector and wire up change handler
+const vocabSelect = document.getElementById("vocabSelect");
+vocabularies.forEach((vocab, i) => {
+  const option = document.createElement("option");
+  option.value = i;
+  option.textContent = vocab.name;
+  vocabSelect.append(option);
+});
+vocabSelect.value = selectedList.value;
+vocabSelect.addEventListener("change", () => {
+  selectedList.set(Number(vocabSelect.value));
+  resetExam();
+  navigate("/");
+});
+
 const ListPage = () => {
   const { table, thead, tbody, tr, td } = htmlTags;
   const headerCell = (text) => td({ style: "border-bottom: solid" }, text);
@@ -143,8 +158,11 @@ const ExamPage = () => {
       outcome.subscribe((value) => {
         outcomeEl.replaceChildren(value || "");
       }),
-      score.subscribe((value) => {
-        scoreEl.textContent = `Score: ${value}/${total}`;
+      score.subscribe(() => {
+        scoreEl.textContent = `Score: ${score.value}/${total.value}`;
+      }),
+      total.subscribe(() => {
+        scoreEl.textContent = `Score: ${score.value}/${total.value}`;
       }),
       remainingWords.subscribe((value) => {
         remainingWordsEl.textContent = value.length;

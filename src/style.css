@@ -66,6 +66,19 @@ a {
   border-radius: 5px;
   padding: 1em;
 }
+select.button {
+  color: var(--textColor);
+  border: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 1.5em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5em center;
+}
 .nav-bar {
   width: 38em;
 }
