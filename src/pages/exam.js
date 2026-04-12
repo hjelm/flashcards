@@ -14,18 +14,12 @@ import {
 export const ExamPage = () => {
   const { div, form, input, span, button } = elements;
 
-  const currentWordEl = div({
-    className: "self-center text-lg text-gray pb-1 primary",
-  });
   const answerInputEl = input({
     type: "text",
     placeholder: "Enter answer",
     className: "rounded-sm place-stretch px-0_5 items-center border-none",
+    style: () => `background-color: ${answerInputBgColor.value}`,
   });
-  const outcomeEl = div({ className: "self-center mt-1" });
-  const answerFormEl = form(div(answerInputEl, outcomeEl));
-  const remainingWordsEl = span();
-  const scoreEl = div({ className: "self-center py-1" });
 
   const nextWord = () => {
     answerInputEl.value = "";
@@ -65,45 +59,40 @@ export const ExamPage = () => {
 
   return createPage({
     content: div(
-      currentWordEl,
+      div(
+        {
+          className: "self-center text-lg text-gray pb-1 primary",
+        },
+        () => currentWord.value?.eng || "",
+      ),
       div(
         { className: "py-1 self-center" },
         "How do you write that in Bulgarian?",
       ),
-      answerFormEl,
-      div({ className: "self-center" }, "Remaining words: ", remainingWordsEl),
-      scoreEl,
+      form(
+        {
+          onsubmit: (e) => {
+            e.preventDefault();
+            checkAnswer();
+          },
+        },
+        div(
+          answerInputEl,
+          div({ className: "self-center mt-1" }, () => outcome.value),
+        ),
+      ),
+      div(
+        { className: "self-center" },
+        "Remaining words: ",
+        span(() => remainingWords.value.length),
+      ),
+      div(
+        { className: "self-center py-1" },
+        () => `Score: ${score.value}/${total.value}`,
+      ),
     ),
     onConnected: () => {
-      unsubscribe = [
-        currentWord.subscribe((value) => {
-          currentWordEl.textContent = value?.eng || "";
-        }),
-        outcome.subscribe((value) => {
-          outcomeEl.replaceChildren(value || "");
-        }),
-        score.subscribe(() => {
-          scoreEl.textContent = `Score: ${score.value}/${total.value}`;
-        }),
-        total.subscribe(() => {
-          scoreEl.textContent = `Score: ${score.value}/${total.value}`;
-        }),
-        remainingWords.subscribe((value) => {
-          remainingWordsEl.textContent = value.length;
-        }),
-        answerInputBgColor.subscribe((value) => {
-          answerInputEl.style.backgroundColor = value;
-        }),
-      ];
-      answerFormEl.onsubmit = (e) => {
-        e.preventDefault();
-        checkAnswer();
-      };
       answerInputEl.focus();
-    },
-    onDisconnected: () => {
-      unsubscribe.forEach((fn) => fn());
-      unsubscribe = null;
     },
   });
 };

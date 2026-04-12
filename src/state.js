@@ -51,16 +51,17 @@ export const createState = (initialValue) => {
  * @param {() => unknown} fn
  * @returns {() => void} unsubscribe
  */
-export const track = (fn) => {
+export const track = (fn, node) => {
   const deps = new Set();
   currentObserver = deps;
   fn();
   currentObserver = null;
 
-  const unsubs = [...deps].map((state) =>
+  let unsubs;
+  unsubs = [...deps].map((state) =>
     state.subscribe(() => {
       if (node && !node.isConnected) {
-        unsubs.forEach((u) => u()); // auto-cleanup when detached
+        unsubs?.forEach((u) => u()); // 👈 guard in case of early fire
         return;
       }
       fn();

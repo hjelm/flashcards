@@ -102,14 +102,20 @@ export const diff = (original, input) => {
 const resolveChild = (child) => {
   if (typeof child !== "function") return child;
 
-  // Render once to get the initial node
   let node = toNode(child());
 
-  track(() => {
-    const newNode = toNode(child());
-    node.replaceWith(newNode);
-    node = newNode;
-  }, node);
+  track(
+    () => {
+      const newNode = toNode(child());
+      node.replaceWith(newNode);
+      node = newNode;
+    },
+    {
+      get isConnected() {
+        return node.isConnected;
+      },
+    },
+  );
 
   return node;
 };
