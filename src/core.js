@@ -119,3 +119,26 @@ export const shuffle = (array) => {
   }
   return result;
 };
+
+const element = (tag, attrsOrChild, ...rest) => {
+  const hasAttrs =
+    attrsOrChild !== null &&
+    typeof attrsOrChild === "object" &&
+    !(attrsOrChild instanceof Node);
+  const attrs = hasAttrs ? attrsOrChild : {};
+  const children = hasAttrs ? rest : [attrsOrChild, ...rest];
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) node[k] = v;
+  node.append(...children);
+  return node;
+};
+
+export const htmlTags = new Proxy(
+  {},
+  {
+    get:
+      (_, tag) =>
+      (...args) =>
+        element(tag, ...args),
+  },
+);
