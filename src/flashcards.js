@@ -1,4 +1,4 @@
-import { html, highlightDiff } from "./core.js";
+import { createPage, html, highlightDiff } from "./core.js";
 import { vocabularies } from "./vocabularies.js";
 import {
   selectedList,
@@ -9,35 +9,26 @@ import {
   answerInputBgColor,
   currentWord,
   outcome,
+  resetExam,
+  getRandomWord,
 } from "./state.js";
 
-const getRandomWord = () => {
-  if (remainingWords.value.length === 0) {
-    currentWord.set(undefined);
-    return;
-  }
-  const index = Math.floor(Math.random() * remainingWords.value.length);
-  const randomWord = remainingWords.value[index];
-  remainingWords.set((prev) => prev.filter((_, i) => i !== index));
-  return randomWord;
-};
-currentWord.set(getRandomWord());
-
-const ListPage = () => ({
-  content: html`
-    <table style="font-size: 2rem;">
-      <thead>
-        <td style="border-bottom: solid">Bulgarian</td>
-        <td style="border-bottom: solid">English</td>
-      </thead>
-      <tbody>
-        ${vocabularies[selectedList].list
-          .map((w) => `<tr><td>${w.bul}</td><td>${w.eng}</td></tr>`)
-          .join("\n")}
-      </tbody>
-    </table>
-  `,
-});
+const ListPage = () =>
+  createPage({
+    content: html`
+      <table style="font-size: 2rem;">
+        <thead>
+          <td style="border-bottom: solid">Bulgarian</td>
+          <td style="border-bottom: solid">English</td>
+        </thead>
+        <tbody>
+          ${vocabularies[selectedList].list
+            .map((w) => `<tr><td>${w.bul}</td><td>${w.eng}</td></tr>`)
+            .join("\n")}
+        </tbody>
+      </table>
+    `,
+  });
 
 const ResultsPage = () => {
   let content = html`<p>All words have been covered.</p> `;
@@ -59,16 +50,12 @@ const ResultsPage = () => {
 
   const onConnected = () => {
     document.getElementById("restartButton").onclick = () => {
-      mistakeList.value.length = 0;
-      remainingWords.set([...vocabularies[selectedList].list]);
-      score.set(0);
-      outcome.set("");
-      currentWord.set(getRandomWord());
+      resetExam();
       navigateToRoute("/");
     };
   };
 
-  return { content, onConnected };
+  return createPage({ content, onConnected });
 };
 
 const ExamPage = () => {
@@ -168,7 +155,7 @@ const ExamPage = () => {
     unsubscribe.forEach((fn) => fn());
   };
 
-  return { content, onConnected, onDisconnected };
+  return createPage({ content, onConnected, onDisconnected });
 };
 
 const routes = {

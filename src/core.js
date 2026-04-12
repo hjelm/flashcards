@@ -1,4 +1,19 @@
 /**
+ * Creates a page object with a rendered content fragment and optional lifecycle hooks.
+ *
+ * @param {object} options
+ * @param {() => DocumentFragment} options.render - Returns the page's DOM content.
+ * @param {() => void} [options.onConnected] - Called after the page is mounted to the DOM.
+ * @param {() => void} [options.onDisconnected] - Called before the page is unmounted from the DOM.
+ * @returns {{ content: DocumentFragment, onConnected?: () => void, onDisconnected?: () => void }}
+ */
+export const createPage = ({ content, onConnected, onDisconnected }) => ({
+  content,
+  onConnected,
+  onDisconnected,
+});
+
+/**
  * Tagged template literal that parses an HTML string into a DocumentFragment.
  *
  * @example
