@@ -1,4 +1,5 @@
 import { createPage, html, highlightDiff } from "./core.js";
+import { initRouter, registerRoutes, navigate } from "./router.js";
 import { vocabularies } from "./vocabularies.js";
 import {
   selectedList,
@@ -50,7 +51,7 @@ const ResultsPage = () => {
   const onConnected = () => {
     document.getElementById("restartButton").onclick = () => {
       resetExam();
-      navigateToRoute("/");
+      navigate("/");
     };
   };
 
@@ -90,7 +91,7 @@ const ExamPage = () => {
     remainingWords.set((prev) => prev.slice(1));
     currentWord.set(next);
     if (next) answerInput.focus();
-    else navigateToRoute("/results");
+    else navigate("/results");
   };
 
   const checkAnswer = () => {
@@ -159,41 +160,9 @@ const ExamPage = () => {
   return createPage({ content, onConnected, onDisconnected });
 };
 
-const routes = {
+registerRoutes({
   "/": ExamPage,
   "/results": ResultsPage,
   "/list": ListPage,
-};
-
-let currentPage;
-const renderContent = (route) => {
-  if (currentPage?.onDisconnected) currentPage.onDisconnected();
-  currentPage =
-    route in routes
-      ? routes[route]()
-      : { content: html`<h1>404 Not Found</h1>` };
-  document.getElementById("app").replaceChildren(currentPage.content);
-  if (currentPage?.onConnected) currentPage.onConnected();
-};
-
-const navigateToRoute = (route) => {
-  window.history.pushState({}, "", route);
-  renderContent(route);
-};
-
-const navigate = (event) => {
-  event.preventDefault();
-  const route = event.target.getAttribute("href");
-  navigateToRoute(route);
-};
-
-document.querySelectorAll(".nav-link").forEach((link) => {
-  link.addEventListener("click", navigate);
 });
-
-window.onpopstate = () => {
-  renderContent(window.location.pathname);
-};
-
-// Initial render
-renderContent(window.location.pathname);
+initRouter();
