@@ -17,21 +17,21 @@ const collection = [
 let answerInput;
 let selectedList = 0;
 const mistakeList = [];
-const wordList = createState([...collection[selectedList].list]);
-const total = wordList.value.length;
+const remainingWords = createState([...collection[selectedList].list]);
+const total = remainingWords.value.length;
 const score = createState(0);
 const answerInputBgColor = createState("#aaa");
 const currentWord = createState();
 const outcome = createState("");
 
 const getRandomWord = () => {
-  if (wordList.value.length === 0) {
+  if (remainingWords.value.length === 0) {
     currentWord.set(undefined);
     return;
   }
-  const index = Math.floor(Math.random() * wordList.value.length);
-  const randomWord = wordList.value[index];
-  wordList.set((prev) => prev.filter((_, i) => i !== index));
+  const index = Math.floor(Math.random() * remainingWords.value.length);
+  const randomWord = remainingWords.value[index];
+  remainingWords.set((prev) => prev.filter((_, i) => i !== index));
   return randomWord;
 };
 currentWord.set(getRandomWord());
@@ -73,7 +73,7 @@ const ResultsPage = () => {
   const onConnected = () => {
     document.getElementById("restartButton").onclick = () => {
       mistakeList.length = 0;
-      wordList.set([...collection[selectedList].list]);
+      remainingWords.set([...collection[selectedList].list]);
       score.set(0);
       outcome.set("");
       currentWord.set(getRandomWord());
@@ -142,28 +142,25 @@ const ExamPage = () => {
 
   const onConnected = () => {
     unsubscribe = [
-      currentWord.subscribe(() => {
-        document.getElementById("currentWord").textContent =
-          currentWord.value?.eng || "";
+      currentWord.subscribe((value) => {
+        document.getElementById("currentWord").textContent = value?.eng || "";
       }),
 
-      outcome.subscribe(() => {
-        document.getElementById("outcome").innerHTML = outcome.value || "";
+      outcome.subscribe((value) => {
+        document.getElementById("outcome").innerHTML = value || "";
       }),
 
-      score.subscribe(() => {
+      score.subscribe((value) => {
         document.getElementById("score").textContent =
-          `Score: ${score.value}/${total}`;
+          `Score: ${value}/${total}`;
       }),
 
-      wordList.subscribe(() => {
-        document.getElementById("remainingWords").textContent =
-          wordList.value.length;
+      remainingWords.subscribe((value) => {
+        document.getElementById("remainingWords").textContent = value.length;
       }),
 
-      answerInputBgColor.subscribe(() => {
-        document.getElementById("answerInput").style.backgroundColor =
-          answerInputBgColor.value;
+      answerInputBgColor.subscribe((value) => {
+        document.getElementById("answerInput").style.backgroundColor = value;
       }),
     ];
 

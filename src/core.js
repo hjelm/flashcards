@@ -30,7 +30,7 @@ export const createState = (initialValue) => {
       for (const sub of [...subscribers]) sub(value);
     },
     subscribe(fn) {
-      fn();
+      fn(value);
       subscribers.add(fn);
       return () => subscribers.delete(fn);
     },
