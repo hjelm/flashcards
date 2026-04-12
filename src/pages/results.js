@@ -1,13 +1,14 @@
 import { navigate } from "../router.js";
-import { createPage, highlightDiff, htmlTags, fragment } from "../core.js";
+import { diff, elements } from "../dom.js";
+import { createPage } from "../core.js";
 import { mistakeList, resetExam } from "../state.js";
 
 export const ResultsPage = () => {
-  const { p, div, ul, li, span, br, button } = htmlTags;
+  const { p, div, ul, li, span, br, button } = elements;
   const restartButton = button("Restart exam");
-  const s = (text) => span({ className: "text-xl" }, text);
+  const spanXl = (text) => span({ className: "text-xl" }, text);
   return createPage({
-    content: fragment(
+    content: div(
       p("All words have been covered."),
       ...(mistakeList.value.length > 0
         ? [
@@ -15,13 +16,13 @@ export const ResultsPage = () => {
             ul(
               ...mistakeList.value.map((m) =>
                 li(
-                  s(`${m.eng}:`),
+                  spanXl(`${m.eng}:`),
                   " you wrote",
                   br(),
-                  s(highlightDiff(m.bul, m.answer)),
+                  spanXl(diff(m.bul, m.answer)),
                   ", correct is",
                   br(),
-                  s(m.bul),
+                  spanXl(m.bul),
                 ),
               ),
             ),

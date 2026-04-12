@@ -1,9 +1,10 @@
-import { createPage, htmlTags } from "../core.js";
+import { elements } from "../dom.js";
+import { createPage } from "../core.js";
 import { selectedList } from "../state.js";
 import { vocabularies } from "../vocabularies.js";
 
 export const ListPage = () => {
-  const { table, thead, tbody, tr, td } = htmlTags;
+  const { table, thead, tbody, tr, td } = elements;
   const headerCell = (text) => td({ style: "border-bottom: solid" }, text);
   return createPage({
     content: table(

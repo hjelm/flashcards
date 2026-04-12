@@ -1,5 +1,6 @@
 import { navigate } from "../router.js";
-import { createPage, highlightDiff, htmlTags, fragment } from "../core.js";
+import { diff, elements } from "../dom.js";
+import { createPage } from "../core.js";
 import {
   mistakeList,
   remainingWords,
@@ -11,7 +12,7 @@ import {
 } from "../state.js";
 
 export const ExamPage = () => {
-  const { div, form, input, span } = htmlTags;
+  const { div, form, input, span } = elements;
 
   const currentWordEl = div({
     className: "self-center text-lg text-gray pb-1 primary",
@@ -44,8 +45,8 @@ export const ExamPage = () => {
       answerInputBgColor.set("green");
       score.set((prev) => prev + 1);
     } else {
-      const message = fragment(
-        highlightDiff(currentWord.value?.bul, answer),
+      const message = span(
+        diff(currentWord.value?.bul, answer),
         " is incorrect.",
       );
       outcome.set(message);
@@ -63,7 +64,7 @@ export const ExamPage = () => {
   let unsubscribe = null;
 
   return createPage({
-    content: fragment(
+    content: div(
       currentWordEl,
       div(
         { className: "py-1 self-center" },
