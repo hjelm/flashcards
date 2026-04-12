@@ -60,7 +60,7 @@ export function html(strings, ...values) {
  *
  * @param {string} original - The reference string to compare against.
  * @param {string} input - The string to highlight differences in.
- * @returns {string}
+ * @returns {DocumentFragment}
  */
 export const highlightDiff = (original, input) => {
   const m = original.length,

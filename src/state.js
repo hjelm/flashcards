@@ -47,7 +47,7 @@ export const mistakeList = createState([]);
 export const remainingWords = createState(
   shuffle([...vocabularies[selectedList.value].list]),
 );
-export const total = createState(remainingWords.value.length);
+export const total = createState(vocabularies[selectedList.value].list.length);
 export const score = createState(0);
 export const outcome = createState("");
 export const answerInputBgColor = createState("#aaa");
@@ -55,12 +55,11 @@ export const currentWord = createState(remainingWords.value[0]);
 remainingWords.set((prev) => prev.slice(1));
 
 export const resetExam = () => {
-  const shuffled = shuffle([...vocabularies[selectedList.value].list]);
   score.set(0);
   outcome.set("");
   mistakeList.set([]);
-  total.set(shuffled.length);
-  remainingWords.set(shuffled);
+  total.set(vocabularies[selectedList.value].list.length);
+  remainingWords.set(shuffle([...vocabularies[selectedList.value].list]));
   const next = remainingWords.value[0];
   remainingWords.set((prev) => prev.slice(1));
   currentWord.set(next);
