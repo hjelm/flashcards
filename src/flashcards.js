@@ -1,28 +1,15 @@
-import { createState, html, highlightDiff } from "./core.js";
-
-const collection = [
-  {
-    name: "",
-    list: [
-      { bul: "дразнещ", eng: "irritating" },
-      { bul: "тъкмо", eng: "just now" },
-      { bul: "поздравления", eng: "congratulations" },
-      { bul: "споделяне", eng: "share" },
-      { bul: "скучно", eng: "bored" },
-      { bul: "доволен", eng: "satisfied" },
-    ],
-  },
-];
-
-let answerInput;
-let selectedList = 0;
-const mistakeList = [];
-const remainingWords = createState([...collection[selectedList].list]);
-const total = remainingWords.value.length;
-const score = createState(0);
-const answerInputBgColor = createState("#aaa");
-const currentWord = createState();
-const outcome = createState("");
+import { html, highlightDiff } from "./core.js";
+import { vocabularies } from "./vocabularies.js";
+import {
+  selectedList,
+  mistakeList,
+  remainingWords,
+  total,
+  score,
+  answerInputBgColor,
+  currentWord,
+  outcome,
+} from "./state.js";
 
 const getRandomWord = () => {
   if (remainingWords.value.length === 0) {
@@ -44,7 +31,7 @@ const ListPage = () => ({
         <td style="border-bottom: solid">English</td>
       </thead>
       <tbody>
-        ${collection[selectedList].list
+        ${vocabularies[selectedList].list
           .map((w) => `<tr><td>${w.bul}</td><td>${w.eng}</td></tr>`)
           .join("\n")}
       </tbody>
@@ -54,11 +41,11 @@ const ListPage = () => ({
 
 const ResultsPage = () => {
   let content = html`<p>All words have been covered.</p> `;
-  if (mistakeList.length > 0)
+  if (mistakeList.value.length > 0)
     content.append(html`
       <div class="list-title">Your mistakes:</div>
       <ul>
-        ${mistakeList
+        ${mistakeList.value
           .map(
             (m) => `
         <li><span class="text-xl">${m.eng}:</span> you wrote<br>
@@ -72,8 +59,8 @@ const ResultsPage = () => {
 
   const onConnected = () => {
     document.getElementById("restartButton").onclick = () => {
-      mistakeList.length = 0;
-      remainingWords.set([...collection[selectedList].list]);
+      mistakeList.value.length = 0;
+      remainingWords.set([...vocabularies[selectedList].list]);
       score.set(0);
       outcome.set("");
       currentWord.set(getRandomWord());
@@ -108,6 +95,8 @@ const ExamPage = () => {
     <div id="score" class="self-center py-1"></div>
   `;
 
+  let answerInput;
+
   const nextWord = () => {
     answerInput.value = "";
     outcome.set("");
@@ -128,7 +117,10 @@ const ExamPage = () => {
         `${highlightDiff(currentWord.value?.bul, answer)} is incorrect.`,
       );
       answerInputBgColor.set("red");
-      mistakeList.push({ ...currentWord.value, answer: answer });
+      mistakeList.set((prev) => [
+        ...prev,
+        { ...currentWord.value, answer: answer },
+      ]);
     }
     setTimeout(() => {
       nextWord();
