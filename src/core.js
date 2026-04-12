@@ -89,11 +89,19 @@ export const highlightDiff = (original, input) => {
     }
   }
 
-  return [...input]
-    .map((char, k) =>
-      matchedInInput.has(k) ? char : `<span style="color:red">${char}</span>`,
-    )
-    .join("");
+  const fragment = new DocumentFragment();
+  [...input].forEach((char, k) => {
+    if (matchedInInput.has(k)) {
+      fragment.append(document.createTextNode(char));
+    } else {
+      const span = document.createElement("span");
+      span.style.color = "red";
+      span.textContent = char;
+      fragment.append(span);
+    }
+  });
+
+  return fragment;
 };
 
 /**

@@ -113,12 +113,12 @@ const ExamPage = () => {
     const answer = answerInput.value;
     if (!answer) outcome.set("");
     else if (answer.toLowerCase() === currentWord.value?.bul.toLowerCase()) {
-      outcome.set("correct!");
+      outcome.set(html`correct!`);
       answerInputBgColor.set("green");
       score.set((prev) => prev + 1);
     } else {
       outcome.set(
-        `${highlightDiff(currentWord.value?.bul, answer)} is incorrect.`,
+        html`${highlightDiff(currentWord.value?.bul, answer)} is incorrect.`,
       );
       answerInputBgColor.set("red");
       mistakeList.set((prev) => [
@@ -143,7 +143,7 @@ const ExamPage = () => {
       }),
 
       outcome.subscribe((value) => {
-        document.getElementById("outcome").innerHTML = value || "";
+        document.getElementById("outcome").replaceChildren(value);
       }),
 
       score.subscribe((value) => {
