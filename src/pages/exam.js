@@ -1,8 +1,6 @@
-import { createPage, highlightDiff, htmlTags } from "./core.js";
-import { initRouter, registerRoutes, navigate } from "./router.js";
-import { vocabularies } from "./vocabularies.js";
+import { navigate } from "../router.js";
+import { createPage, highlightDiff, htmlTags } from "../core.js";
 import {
-  selectedList,
   mistakeList,
   remainingWords,
   total,
@@ -10,82 +8,9 @@ import {
   answerInputBgColor,
   currentWord,
   outcome,
-  resetExam,
-} from "./state.js";
+} from "../state.js";
 
-// Populate the vocab selector and wire up change handler
-const vocabSelect = document.getElementById("vocabSelect");
-vocabularies.forEach((vocab, i) => {
-  const option = document.createElement("option");
-  option.value = i;
-  option.textContent = vocab.name;
-  vocabSelect.append(option);
-});
-vocabSelect.value = selectedList.value;
-vocabSelect.addEventListener("change", () => {
-  selectedList.set(Number(vocabSelect.value));
-  resetExam();
-  navigate("/");
-});
-
-const ListPage = () => {
-  const { table, thead, tbody, tr, td } = htmlTags;
-  const headerCell = (text) => td({ style: "border-bottom: solid" }, text);
-  return createPage({
-    content: table(
-      { style: "font-size: 2rem" },
-      thead(tr(headerCell("Bulgarian"), headerCell("English"))),
-      tbody(
-        ...vocabularies[selectedList.value].list.map((w) =>
-          tr(td(w.bul), td(w.eng)),
-        ),
-      ),
-    ),
-  });
-};
-
-const ResultsPage = () => {
-  const { p, div, ul, li, span, br, button } = htmlTags;
-
-  const restartButton = button("Restart exam");
-
-  const s = (text) => span({ className: "text-xl" }, text);
-
-  const content = new DocumentFragment();
-  content.append(
-    p("All words have been covered."),
-    ...(mistakeList.value.length > 0
-      ? [
-          div({ className: "list-title" }, "Your mistakes:"),
-          ul(
-            ...mistakeList.value.map((m) =>
-              li(
-                s(`${m.eng}:`),
-                " you wrote",
-                br(),
-                s(highlightDiff(m.bul, m.answer)),
-                ", correct is",
-                br(),
-                s(m.bul),
-              ),
-            ),
-          ),
-        ]
-      : []),
-    restartButton,
-  );
-
-  const onConnected = () => {
-    restartButton.onclick = () => {
-      resetExam();
-      navigate("/");
-    };
-  };
-
-  return createPage({ content, onConnected });
-};
-
-const ExamPage = () => {
+export const ExamPage = () => {
   const { div, form, input, span } = htmlTags;
 
   const currentWordEl = div({
@@ -185,10 +110,3 @@ const ExamPage = () => {
 
   return createPage({ content, onConnected, onDisconnected });
 };
-
-registerRoutes({
-  "/": ExamPage,
-  "/results": ResultsPage,
-  "/list": ListPage,
-});
-initRouter();
