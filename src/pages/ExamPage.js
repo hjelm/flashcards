@@ -8,11 +8,12 @@ import {
   score,
   answerInputBgColor,
   currentWord,
-  outcome,
+  createState,
 } from "../state.js";
 
 export default function ExamPage() {
-  const { div, form, input, span, button } = elements;
+  const { div, form, input, span } = elements;
+  const outcome = createState("");
 
   const answerInputEl = input({
     type: "text",
@@ -55,8 +56,6 @@ export default function ExamPage() {
     answerInputEl.focus();
   };
 
-  let unsubscribe = null;
-
   return createPage({
     content: div(
       div(
@@ -74,10 +73,7 @@ export default function ExamPage() {
             checkAnswer();
           },
         },
-        div(
-          answerInputEl,
-          div({ className: "self-center mt-1" }, () => outcome.value),
-        ),
+        div(answerInputEl, div({ className: "self-center mt-1" }, outcome)),
       ),
       div(
         { className: "self-center" },

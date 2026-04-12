@@ -100,6 +100,14 @@ export const diff = (original, input) => {
  * @returns {Node}
  */
 const resolveChild = (child) => {
+  if (
+    child !== null &&
+    typeof child === "object" &&
+    typeof child.subscribe === "function" &&
+    "value" in child
+  )
+    return resolveChild(() => child.value);
+
   if (typeof child !== "function") return child;
 
   let node = toNode(child());

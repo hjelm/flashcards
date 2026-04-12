@@ -78,7 +78,6 @@ export const remainingWords = createState(
 );
 export const total = createState(vocabularies[selectedList.value].list.length);
 export const score = createState(0);
-export const outcome = createState("");
 export const answerInputBgColor = createState("#aaa");
 export const currentWord = createState(remainingWords.value[0]);
 remainingWords.set((prev) => prev.slice(1));
