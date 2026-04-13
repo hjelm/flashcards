@@ -15,7 +15,7 @@ export default function ExamPage() {
   const { div, form, input, span } = elements;
   const outcome = createState("");
 
-  const answerInputEl = input({
+  const Input = input({
     type: "text",
     placeholder: "Enter answer",
     className: "rounded-sm place-stretch px-0_5 items-center border-none",
@@ -23,17 +23,17 @@ export default function ExamPage() {
   });
 
   const nextWord = () => {
-    answerInputEl.value = "";
+    Input.value = "";
     outcome.set("");
     const next = remainingWords.value[0];
     remainingWords.set((prev) => prev.slice(1));
     currentWord.set(next);
-    if (next) answerInputEl.focus();
+    if (next) Input.focus();
     else navigate("/results");
   };
 
   const checkAnswer = () => {
-    const answer = answerInputEl.value;
+    const answer = Input.value;
     if (!answer) outcome.set("");
     else if (answer.toLowerCase() === currentWord.value?.bul.toLowerCase()) {
       outcome.set("correct!");
@@ -52,8 +52,8 @@ export default function ExamPage() {
       nextWord();
       answerInputBgColor.set("#aaa");
     }, 700);
-    answerInputEl.value = answer;
-    answerInputEl.focus();
+    Input.value = answer;
+    Input.focus();
   };
 
   return createPage({
@@ -67,13 +67,8 @@ export default function ExamPage() {
         "How do you write that in Bulgarian?",
       ),
       form(
-        {
-          onsubmit: (e) => {
-            e.preventDefault();
-            checkAnswer();
-          },
-        },
-        div(answerInputEl, div({ className: "self-center mt-1" }, outcome)),
+        { onsubmit: (e) => (e.preventDefault(), checkAnswer()) },
+        div(Input, div({ className: "self-center mt-1" }, outcome)),
       ),
       div(
         { className: "self-center" },
@@ -86,7 +81,7 @@ export default function ExamPage() {
       ),
     ),
     onConnected: () => {
-      answerInputEl.focus();
+      Input.focus();
     },
   });
 }
