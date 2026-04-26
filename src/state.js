@@ -76,6 +76,7 @@ export const mistakeList = createState([]);
 export const remainingWords = createState(
   shuffle([...vocabularies[selectedList.value].list]),
 );
+export const outcome = createState("");
 export const total = createState(vocabularies[selectedList.value].list.length);
 export const score = createState(0);
 export const answerInputBgColor = createState("#aaa");

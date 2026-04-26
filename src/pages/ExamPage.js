@@ -4,16 +4,15 @@ import { createPage } from "../core.js";
 import {
   mistakeList,
   remainingWords,
+  outcome,
   total,
   score,
   answerInputBgColor,
   currentWord,
-  createState,
 } from "../state.js";
 
 export default function ExamPage() {
   const { div, form, input, span } = elements;
-  const outcome = createState("");
 
   const Input = input({
     type: "text",
@@ -62,10 +61,7 @@ export default function ExamPage() {
         { className: "self-center text-lg text-gray pb-1 primary" },
         () => currentWord.value?.eng || "",
       ),
-      div(
-        { className: "py-1 self-center" },
-        "How do you write that in Bulgarian?",
-      ),
+      div({ className: "py-1 self-center" }, "How do you write that in Bulgarian?",),
       form(
         { onsubmit: (e) => (e.preventDefault(), checkAnswer()) },
         div(Input, div({ className: "self-center mt-1" }, outcome)),
